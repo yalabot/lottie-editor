@@ -225,10 +225,3 @@ export default class extends Component<any, any> {
     );
   }
 }
-
-// todo:
-// cancel edits when key code === 27
-// fucked up diff (_render, etc), added extra props (by React state?) (why?)
-// test more cases ..
-// upload json instead of fetch (drag to upload would be nice)
-// clean code
