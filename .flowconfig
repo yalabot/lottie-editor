@@ -1,0 +1,4 @@
+[options]
+  esproposal.decorators=ignore
+  suppress_comment=\\(.\\|\n\\)*\\flow-disable-next-line
+  unsafe.enable_getters_and_setters=true
