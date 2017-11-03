@@ -2,15 +2,9 @@
 
 const chalk = require('chalk');
 
-const json = require('../public/whale.json');
+const { rgbToHex } = require('../src/utils');
 
-const componentToHex = c => {
-  const hex = c.toString(16);
-  return hex.length === 1 ? `0${hex}` : hex;
-};
-
-const rgbToHex = (r, g, b) =>
-  `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
+const json = require('./whale.json');
 
 const getColors = tree =>
   tree.forEach(
@@ -31,8 +25,6 @@ const getColors = tree =>
             console.log(chalk.rgb(r, g, b)(rgbToHex(r, g, b)));
 
             // tree[i].shapes[j].it[k].c.k = [0 / 255, 0 / 255, 0 / 255, a];
-
-            // console.log(JSON.stringify(json));
           }
         })
       )

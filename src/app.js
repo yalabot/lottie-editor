@@ -2,10 +2,12 @@
 
 import React, { Component } from 'react';
 
+import Button from 'material-ui/FlatButton';
+import DownloadIcon from 'material-ui/svg-icons/file/file-download';
+import Dropzone from 'react-dropzone';
 import Table from 'react-dt';
-import fetch from 'isomorphic-fetch';
-import FlatButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
+import UploadIcon from 'material-ui/svg-icons/file/file-upload';
 
 import { Full, Paper } from './helpers';
 import { rgbToHex, hexToRgb } from './utils';
@@ -14,17 +16,12 @@ import Bodymovin from './bodymovin';
 
 export default class extends Component<any, any> {
   state = {
-    err: '',
     i: -1,
     j: -1,
     json: null,
-    rows: [],
-    url: 'https://bodymovin-editor.firebaseapp.com/whale.json'
+    name: '',
+    rows: []
   };
-
-  onChange = (e: any, url: string) => this.setState({ url });
-
-  onKeyUp = (e: any) => e.keyCode === 13 && this.upload();
 
   getColors = (tree: Object, asset: number = -1) =>
     tree.forEach(
@@ -51,6 +48,7 @@ export default class extends Component<any, any> {
                 g,
                 b,
                 asset,
+                nm: prop.nm,
                 color: rgbToHex(r, g, b)
               });
             }
@@ -66,12 +64,14 @@ export default class extends Component<any, any> {
     this.setState({ rows: newRows });
   };
 
-  upload = () =>
-    this.setState({ json: null, err: '' }, () =>
-      fetch(this.state.url)
-        .then(res => res.json())
-        .then(json =>
-          this.setState({ json }, () => {
+  upload = (files: any) => {
+    if (files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = e =>
+        this.setState(
+          { json: JSON.parse(e.target.result), name: files[0].name },
+          () => {
             this.colors = [];
 
             if (this.state.json && this.state.json.layers)
@@ -83,32 +83,39 @@ export default class extends Component<any, any> {
               );
 
             this.setState({ rows: this.colors });
-          })
-        )
-        .catch(err => this.setState({ err: err.message }))
-    );
+          }
+        );
+
+      reader.readAsText(files[0]);
+    }
+  };
 
   download = () => {
-    const uri = `data:text/json;charset=utf-8,${JSON.stringify(
-      this.state.json
-    )}`;
+    const json = JSON.stringify(this.state.json);
+    const uri = `data:text/json;charset=utf-8,${json}`;
+
     const link = document.createElement('a');
+
     link.setAttribute('href', encodeURI(uri));
-    link.setAttribute('download', 'animation.json');
+    link.setAttribute('download', this.state.name);
     link.click();
   };
 
   cols = [
     {
       prop: 'color',
-      label: 'Colors',
-      render: (prop: string) => (
-        <div style={{ backgroundColor: prop, padding: 20 }}>{prop}</div>
+      label: 'Available Colors',
+      render: (prop: string, row: number) => (
+        <div style={{ backgroundColor: prop, fontSize: 16, padding: 20 }}>
+          {prop}
+          <br />
+          <small style={{ color: '#9e9e9e' }}>{this.state.rows[row].nm}</small>
+        </div>
       ),
       editor: (value: string, row: number, col: number) => {
-        const { i, j, k, a, asset } = this.state.rows[row];
+        const { i, j, k, a, asset, nm } = this.state.rows[row];
         return (
-          <div style={{ paddingLeft: 20, paddingRight: 20 }}>
+          <div style={{ backgroundColor: value, padding: 20 }}>
             <TextField
               autoFocus
               fullWidth
@@ -116,9 +123,11 @@ export default class extends Component<any, any> {
               name={`editor-${row}-${col}`}
               onBlur={this.reset}
               onChange={(e, newValue) => {
-                this.updateColor(newValue, row, col);
+                const formattedValue = newValue.toLowerCase();
 
-                const { r, g, b } = hexToRgb(newValue);
+                this.updateColor(formattedValue, row, col);
+
+                const { r, g, b } = hexToRgb(formattedValue);
 
                 const newJson = this.state.json;
 
@@ -148,6 +157,8 @@ export default class extends Component<any, any> {
               }}
               value={value}
             />
+            <br />
+            <small style={{ color: '#9e9e9e' }}>{nm}</small>
           </div>
         );
       }
@@ -171,35 +182,22 @@ export default class extends Component<any, any> {
   reset = () => this.setState({ i: -1, j: -1 });
 
   render() {
-    const Animation = () => (
-      <Bodymovin
-        opts={{
-          animationData: this.state.json,
-          autoplay: true,
-          loop: true
-        }}
-      />
-    );
+    const Animation = () =>
+      this.state.json && (
+        <Bodymovin
+          opts={{
+            animationData: this.state.json,
+            autoplay: true,
+            loop: true
+          }}
+        />
+      );
 
     return (
       <Full style={{ padding: 20 }}>
-        <TextField
-          fullWidth
-          name="animation-url"
-          onChange={this.onChange}
-          onKeyUp={this.onKeyUp}
-          value={this.state.url}
-        />
-        <FlatButton
-          label="Upload"
-          labelStyle={{ textTransform: 'none' }}
-          onClick={this.upload}
-        />
-        {this.state.err && <p style={{ color: 'red' }}>{this.state.err}</p>}
-        {this.state.json && (
-          <Full
-            style={{ flexDirection: 'row', marginTop: 20, marginBottom: 20 }}>
-            <Paper>
+        <Full style={{ flexDirection: 'row' }}>
+          {this.state.json && (
+            <Paper style={{ marginRight: 20 }}>
               <Table
                 cols={this.cols}
                 rows={this.state.rows}
@@ -208,17 +206,36 @@ export default class extends Component<any, any> {
                 selectedCol={this.state.j}
               />
             </Paper>
-            <Paper style={{ flex: 3, marginLeft: 20, overflow: 'hidden' }}>
-              <Animation />
-            </Paper>
-          </Full>
-        )}
+          )}
+          <Paper style={{ flex: 3, overflow: 'hidden' }}>
+            <Dropzone
+              onDrop={this.upload}
+              accept="application/json"
+              multiple={false}
+              style={{ display: 'flex', flex: 1, cursor: 'pointer' }}>
+              <Full>
+                {this.state.json ? (
+                  <Animation />
+                ) : (
+                  <Full
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                    <UploadIcon color="#58d370" />
+                  </Full>
+                )}
+              </Full>
+            </Dropzone>
+          </Paper>
+        </Full>
         {this.state.json && (
-          <FlatButton
-            label="Download"
-            labelStyle={{ textTransform: 'none' }}
+          <Button
+            backgroundColor="#58d370"
+            hoverColor="rgba(88, 211, 112, 0.4)"
+            icon={<DownloadIcon color="#ffffff" />}
             onClick={this.download}
-            primary
+            style={{ marginTop: 20 }}
           />
         )}
       </Full>

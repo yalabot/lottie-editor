@@ -17,7 +17,7 @@ import './style.css';
 const muiTheme = getMuiTheme({
   palette: {
     primary1Color: '#58d370',
-    accent1Color: '#d8d8d8'
+    accent1Color: '#9e9e9e'
   }
 });
 
