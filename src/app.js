@@ -29,7 +29,7 @@ export default class extends Component<any, any> {
         layer.shapes &&
         layer.shapes.forEach((shape, j) =>
           shape.it.forEach((prop, k) => {
-            if (prop.ty === 'fl') {
+            if (prop.ty === 'fl' || prop.ty === 'st') {
               const color = prop.c.k;
 
               let [r, g, b] = color;
