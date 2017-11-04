@@ -26,6 +26,13 @@ const getColors = tree =>
 
             // tree[i].shapes[j].it[k].c.k = [0 / 255, 0 / 255, 0 / 255, a];
           }
+
+          if (
+            i === tree.length - 1 &&
+            j === layer.shapes.length - 1 &&
+            k === shape.it.length - 1
+          )
+            console.log('Reached end of loop ..');
         })
       )
   );
