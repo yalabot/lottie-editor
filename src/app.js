@@ -32,8 +32,8 @@ export default class extends Component<any, any> {
             if (prop.ty === 'fl' || prop.ty === 'st') {
               const color = prop.c.k;
 
-              let [r, g, b] = color;
-              const { a } = color;
+              // eslint-disable-next-line
+              let [r, g, b, a] = color;
 
               r = Math.round(r * 255);
               g = Math.round(g * 255);
@@ -56,6 +56,8 @@ export default class extends Component<any, any> {
         )
     );
 
+  json = null;
+
   colors = [];
 
   updateColor = (newValue: string, i: number, j: number) => {
@@ -68,31 +70,34 @@ export default class extends Component<any, any> {
     if (files[0]) {
       const reader = new FileReader();
 
-      reader.onload = e =>
-        this.setState(
-          { json: JSON.parse(e.target.result), name: files[0].name },
-          () => {
-            this.colors = [];
+      reader.onload = e => {
+        const source = e.target.result;
 
-            if (this.state.json && this.state.json.layers)
-              this.getColors(this.state.json.layers);
+        this.json = source;
 
-            if (this.state.json && this.state.json.assets)
-              this.state.json.assets.forEach((asset, i) =>
-                this.getColors(asset.layers, i)
-              );
+        const json = JSON.parse(source);
 
-            this.setState({ rows: this.colors });
-          }
-        );
+        this.setState({ json, name: files[0].name }, () => {
+          this.colors = [];
+
+          if (this.state.json && this.state.json.layers)
+            this.getColors(this.state.json.layers);
+
+          if (this.state.json && this.state.json.assets)
+            this.state.json.assets.forEach((asset, i) =>
+              this.getColors(asset.layers, i)
+            );
+
+          this.setState({ rows: this.colors });
+        });
+      };
 
       reader.readAsText(files[0]);
     }
   };
 
   download = () => {
-    const json = JSON.stringify(this.state.json);
-    const uri = `data:text/json;charset=utf-8,${json}`;
+    const uri = `data:text/json;charset=utf-8,${this.json || ''}`;
 
     const link = document.createElement('a');
 
@@ -129,26 +134,28 @@ export default class extends Component<any, any> {
 
                 const { r, g, b } = hexToRgb(formattedValue);
 
-                const newJson = this.state.json;
+                const newJson = JSON.parse(this.json || '');
 
                 if (asset === -1) {
                   if (newJson && newJson.layers)
                     newJson.layers[i].shapes[j].it[k].c.k = [
-                      r / 255,
-                      g / 255,
-                      b / 255,
+                      Math.round(r / 255 * 1000) / 1000,
+                      Math.round(g / 255 * 1000) / 1000,
+                      Math.round(b / 255 * 1000) / 1000,
                       a
                     ];
                 } else {
                   // eslint-disable-next-line
                   if (newJson && newJson.assets)
                     newJson.assets[asset].layers[i].shapes[j].it[k].c.k = [
-                      r / 255,
-                      g / 255,
-                      b / 255,
+                      Math.round(r / 255 * 1000) / 1000,
+                      Math.round(g / 255 * 1000) / 1000,
+                      Math.round(b / 255 * 1000) / 1000,
                       a
                     ];
                 }
+
+                this.json = JSON.stringify(newJson);
 
                 this.setState({ json: newJson });
               }}

@@ -15,8 +15,8 @@ const getColors = tree =>
           if (prop.ty === 'fl' || prop.ty === 'st') {
             const color = prop.c.k;
 
-            let [r, g, b] = color;
-            const { a } = color;
+            // eslint-disable-next-line
+            let [r, g, b, a] = color;
 
             r = Math.round(r * 255);
             g = Math.round(g * 255);
