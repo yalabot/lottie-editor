@@ -1,16 +1,14 @@
 // @flow
 
-const componentToHex = c => {
+export const componentToHex = (c: number) => {
   const hex = c.toString(16);
   return hex.length === 1 ? `0${hex}` : hex;
 };
 
-// flow-disable-next-line
-const rgbToHex = (r, g, b) =>
+export const rgbToHex = (r: number, g: number, b: number) =>
   `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
 
-// flow-disable-next-line
-const hexToRgb = hex => {
+export const hexToRgb = (hex: string) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
   return result
@@ -25,5 +23,3 @@ const hexToRgb = hex => {
         b: 0
       };
 };
-
-module.exports = { rgbToHex, hexToRgb };

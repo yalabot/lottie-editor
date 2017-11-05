@@ -1,9 +1,0 @@
-{
-  "license": "UNLICENSED",
-  "dependencies": {
-    "chalk": "2.3.0"
-  },
-  "scripts": {
-    "start": "node index.js"
-  }
-}
