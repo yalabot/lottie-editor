@@ -2,68 +2,100 @@
 
 import React, { Component } from 'react';
 
-import Button from 'material-ui/FlatButton';
-import DownloadIcon from 'material-ui/svg-icons/file/file-download';
 import Dropzone from 'react-dropzone';
-import Table from 'react-dt';
-import TextField from 'material-ui/TextField';
-import UploadIcon from 'material-ui/svg-icons/file/file-upload';
+import { SketchPicker as Picker } from 'react-color';
 
-import { Full, Paper } from './helpers';
-import { rgbToHex, hexToRgb } from './utils';
+import {
+  download,
+  fade,
+  getColors,
+  hexToRgb,
+  invert,
+  toUnitVector
+} from './utils';
 
-import Bodymovin from './bodymovin';
+import { Button, Bodymovin, Full, Icons, Paper, Table } from './helpers';
+
+const palette = {
+  gray: '#9e9e9e',
+  green: '#58d370',
+  white: '#ffffff'
+};
 
 export default class extends Component<any, any> {
   state = {
-    i: -1,
-    j: -1,
-    json: null,
-    name: '',
-    rows: []
+    json: '',
+    jsonName: '',
+    picker: false,
+    presetColors: [],
+    rows: [],
+    selectedCol: -1,
+    selectedRow: -1
   };
 
-  getColors = (tree: Object, asset: number = -1) =>
-    tree.forEach(
-      (layer, i) =>
-        layer.shapes &&
-        layer.shapes.forEach((shape, j) =>
-          shape.it.forEach((prop, k) => {
-            if (prop.ty === 'fl' || prop.ty === 'st') {
-              const color = prop.c.k;
+  cols = [
+    {
+      prop: 'color',
+      render: (color: string, row: number, col: number) => (
+        <div // eslint-disable-line
+          style={Object.assign({}, { backgroundColor: color }, styles.colorRow)}
+          onClick={() =>
+            this.setState({
+              picker: !this.state.picker,
+              selectedCol: col,
+              selectedRow: row
+            })}
+        />
+      )
+    }
+  ];
 
-              // eslint-disable-next-line
-              let [r, g, b, a] = color;
+  original = '';
 
-              r = Math.round(r * 255);
-              g = Math.round(g * 255);
-              b = Math.round(b * 255);
+  hidePicker = () => this.setState({ picker: false });
 
-              this.colors.push({
-                i,
-                j,
-                k,
-                a,
-                r,
-                g,
-                b,
-                asset,
-                nm: prop.nm,
-                color: rgbToHex(r, g, b)
-              });
-            }
-          })
-        )
-    );
+  pickColor = (color: Object) => {
+    const { rows, selectedRow, selectedCol } = this.state;
 
-  json = null;
+    const { i, j, k, a, asset } = rows[selectedRow];
 
-  colors = [];
+    const newColor = color.hex;
 
-  updateColor = (newValue: string, i: number, j: number) => {
-    const newRows = this.state.rows;
-    newRows[i][this.cols[j].prop] = newValue;
+    const newRows = rows;
+    newRows[selectedRow][this.cols[selectedCol].prop] = newColor;
     this.setState({ rows: newRows });
+
+    const newJson = JSON.parse(this.state.json);
+
+    const { r, g, b } = hexToRgb(newColor);
+
+    if (asset === -1) {
+      if (newJson && newJson.layers)
+        newJson.layers[i].shapes[j].it[k].c.k = [
+          toUnitVector(r),
+          toUnitVector(g),
+          toUnitVector(b),
+          a
+        ];
+    } else {
+      // eslint-disable-next-line
+      if (newJson && newJson.assets)
+        newJson.assets[asset].layers[i].shapes[j].it[k].c.k = [
+          toUnitVector(r),
+          toUnitVector(g),
+          toUnitVector(b),
+          a
+        ];
+    }
+
+    this.setState({ json: JSON.stringify(newJson) });
+  };
+
+  pushColor = () => {
+    const { presetColors, rows, selectedRow } = this.state;
+    const { color } = rows[selectedRow];
+
+    this.setState({ presetColors: presetColors.concat(color) });
   };
 
   upload = (files: any) => {
@@ -73,22 +105,25 @@ export default class extends Component<any, any> {
       reader.onload = e => {
         const source = e.target.result;
 
-        this.json = source;
+        this.original = source;
 
-        const json = JSON.parse(source);
+        this.setState({ json: source, picker: false, rows: [] }, () => {
+          const rows = [];
 
-        this.setState({ json, name: files[0].name }, () => {
-          this.colors = [];
+          const json = JSON.parse(this.state.json);
 
-          if (this.state.json && this.state.json.layers)
-            this.getColors(this.state.json.layers);
+          let jsonName = files[0].name.slice(0, -5);
+          jsonName += `-w${json.w}-h${json.h}.json`;
 
-          if (this.state.json && this.state.json.assets)
-            this.state.json.assets.forEach((asset, i) =>
-              this.getColors(asset.layers, i)
+          if (json && json.layers)
+            getColors(json.layers, color => rows.push(color));
+
+          if (json && json.assets)
+            json.assets.forEach((asset, i) =>
+              getColors(asset.layers, color => rows.push(color), i)
             );
 
-          this.setState({ rows: this.colors });
+          this.setState({ rows, jsonName });
         });
       };
 
@@ -96,156 +131,143 @@ export default class extends Component<any, any> {
     }
   };
 
-  download = () => {
-    const uri = `data:text/json;charset=utf-8,${this.json || ''}`;
+  export = () => {
+    download(this.state.json, this.state.jsonName);
 
-    const link = document.createElement('a');
+    // if (process.env.NODE_ENV === 'development')
+    import('diff').then(diff =>
+      import('log-with-style').then(logWithStyle => {
+        // console.clear();
 
-    link.setAttribute('href', encodeURI(uri));
-    link.setAttribute('download', this.state.name);
-    link.click();
-  };
+        let additions = 0;
+        let deletions = 0;
 
-  cols = [
-    {
-      prop: 'color',
-      label: 'Available Colors',
-      render: (prop: string, row: number) => (
-        <div style={{ backgroundColor: prop, fontSize: 16, padding: 20 }}>
-          {prop}
-          <br />
-          <small style={{ color: '#9e9e9e' }}>{this.state.rows[row].nm}</small>
-        </div>
-      ),
-      editor: (value: string, row: number, col: number) => {
-        const { i, j, k, a, asset, nm } = this.state.rows[row];
-        return (
-          <div style={{ backgroundColor: value, padding: 20 }}>
-            <TextField
-              autoFocus
-              fullWidth
-              maxLength="7"
-              name={`editor-${row}-${col}`}
-              onBlur={this.reset}
-              onChange={(e, newValue) => {
-                const formattedValue = newValue.toLowerCase();
+        const original = JSON.stringify(JSON.parse(this.original), null, 2);
+        const parsed = JSON.stringify(JSON.parse(this.state.json), null, 2);
 
-                this.updateColor(formattedValue, row, col);
+        diff
+          .diffTrimmedLines(original, parsed, { newlineIsToken: true })
+          .forEach(part => {
+            const { added, removed, value } = part;
 
-                const { r, g, b } = hexToRgb(formattedValue);
+            const color = added ? 'green' : removed ? 'red' : null;
 
-                const newJson = JSON.parse(this.json || '');
+            if (color)
+              logWithStyle(
+                `[c="color: ${color};"]${added ? '+' : '-'} ${value}[c]`
+              );
 
-                if (asset === -1) {
-                  if (newJson && newJson.layers)
-                    newJson.layers[i].shapes[j].it[k].c.k = [
-                      Math.round(r / 255 * 1000) / 1000,
-                      Math.round(g / 255 * 1000) / 1000,
-                      Math.round(b / 255 * 1000) / 1000,
-                      a
-                    ];
-                } else {
-                  // eslint-disable-next-line
-                  if (newJson && newJson.assets)
-                    newJson.assets[asset].layers[i].shapes[j].it[k].c.k = [
-                      Math.round(r / 255 * 1000) / 1000,
-                      Math.round(g / 255 * 1000) / 1000,
-                      Math.round(b / 255 * 1000) / 1000,
-                      a
-                    ];
-                }
+            if (added) additions += value.length;
+            else if (removed) deletions += value.length;
+          });
 
-                this.json = JSON.stringify(newJson);
-
-                this.setState({ json: newJson });
-              }}
-              onKeyUp={e => {
-                if (e.keyCode === 13) this.reset();
-              }}
-              value={value}
-            />
-            <br />
-            <small style={{ color: '#9e9e9e' }}>{nm}</small>
-          </div>
+        logWithStyle(
+          `[c="color: green;"]${additions} additions[c], [c="color: red;"]${deletions} deletions[c].`
         );
-      }
-    }
-  ];
-
-  tableProps = {
-    tableProps: {
-      fixedHeader: false,
-      selectable: false,
-      onCellClick: (i: number, j: number) => this.setState({ i, j })
-    },
-    tableRowColumnProps: { style: { padding: 0 } },
-    tableBodyProps: { displayRowCheckbox: false },
-    tableHeaderProps: {
-      adjustForCheckbox: false,
-      displaySelectAll: false
-    }
+      })
+    );
   };
-
-  reset = () => this.setState({ i: -1, j: -1 });
 
   render() {
+    const { presetColors, json, picker, rows, selectedRow } = this.state;
+
     const Animation = () =>
-      this.state.json && (
+      json && (
         <Bodymovin
-          opts={{
-            animationData: this.state.json,
-            autoplay: true,
-            loop: true
-          }}
+          fallback={
+            <Full style={styles.landing}>
+              <Icons.Sad color={palette.gray} />
+            </Full>
+          }
+          src={JSON.parse(json)}
         />
       );
 
+    const { color } = (rows && rows[selectedRow]) || {};
+
     return (
-      <Full style={{ padding: 20 }}>
-        <Full style={{ flexDirection: 'row' }}>
-          {this.state.json && (
-            <Paper style={{ marginRight: 20 }}>
-              <Table
-                cols={this.cols}
-                rows={this.state.rows}
-                {...this.tableProps}
-                selectedRow={this.state.i}
-                selectedCol={this.state.j}
-              />
+      <Full style={styles.container}>
+        <Full style={styles.row}>
+          {json && (
+            <Paper style={styles.left}>
+              {picker && (
+                <div style={styles.popover}>
+                  <div // eslint-disable-line
+                    onClick={this.hidePicker}
+                    style={styles.cover}
+                  />
+
+                  <Picker
+                    color={color}
+                    disableAlpha
+                    onChange={this.pickColor}
+                    presetColors={presetColors}
+                  />
+
+                  <div style={styles.pushButton}>
+                    <Button
+                      backgroundColor={color}
+                      fullWidth
+                      hoverColor={fade(color)}
+                      icon={<Icons.Colorize color={invert(color)} />}
+                      onClick={this.pushColor}
+                    />
+                  </div>
+                </div>
+              )}
+              <Table cols={this.cols} rows={rows} />
             </Paper>
           )}
-          <Paper style={{ flex: 3, overflow: 'hidden' }}>
+
+          <Paper style={styles.right}>
             <Dropzone
-              onDrop={this.upload}
               accept="application/json"
               multiple={false}
-              style={{ display: 'flex', flex: 1, cursor: 'pointer' }}>
+              onDrop={this.upload}
+              style={styles.dropzone}>
               <Full>
-                {this.state.json ? (
+                {json ? (
                   <Animation />
                 ) : (
-                  <Full
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                    <UploadIcon color="#58d370" />
+                  <Full style={styles.landing}>
+                    <Icons.Upload color={palette.green} />
                   </Full>
                 )}
               </Full>
             </Dropzone>
           </Paper>
         </Full>
-        {this.state.json && (
-          <Button
-            backgroundColor="#58d370"
-            hoverColor="rgba(88, 211, 112, 0.4)"
-            icon={<DownloadIcon color="#ffffff" />}
-            onClick={this.download}
-            style={{ marginTop: 20 }}
-          />
+
+        {json && (
+          <Paper style={styles.bottom}>
+            <Button
+              backgroundColor={palette.green}
+              hoverColor={fade(palette.green)}
+              icon={<Icons.Download color={palette.white} />}
+              onClick={this.export}
+            />
+          </Paper>
         )}
       </Full>
     );
   }
 }
+
+const styles = {
+  bottom: { marginTop: 20, maxHeight: 48 },
+  colorRow: {
+    cursor: 'pointer',
+    display: 'inline-block',
+    height: 48,
+    width: '100%'
+  },
+  container: { padding: 20 },
+  cover: { bottom: 0, left: 0, position: 'fixed', right: 0, top: 0 },
+  dropzone: { cursor: 'pointer', display: 'flex', flex: 1 },
+  landing: { alignItems: 'center', justifyContent: 'center' },
+  left: { marginRight: 20, maxWidth: 220 },
+  popover: { position: 'absolute', zIndex: 1 },
+  pushButton: { backgroundColor: palette.white },
+  right: { flex: 3, overflow: 'hidden' },
+  row: { flexDirection: 'row' }
+};

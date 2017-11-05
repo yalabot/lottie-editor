@@ -3,26 +3,17 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+
+import App from './app';
+import { Full } from './helpers';
 
 import registerServiceWorker from './registerServiceWorker';
 
-import { Full } from './helpers';
-
-import App from './app';
-
 import './style.css';
 
-const muiTheme = getMuiTheme({
-  palette: {
-    primary1Color: '#58d370',
-    accent1Color: '#9e9e9e'
-  }
-});
-
 const Index = () => (
-  <MuiThemeProvider muiTheme={muiTheme}>
+  <MuiThemeProvider>
     <Full>
       <App />
     </Full>

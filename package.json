@@ -4,8 +4,11 @@
   "private": true,
   "dependencies": {
     "bodymovin": "4.12.3",
+    "diff": "3.4.0",
+    "log-with-style": "0.3.0",
     "material-ui": "0.19.4",
     "react": "16.0.0",
+    "react-color": "2.13.8",
     "react-dom": "16.0.0",
     "react-dropzone": "4.2.1",
     "react-dt": "0.0.4",
