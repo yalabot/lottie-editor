@@ -380,7 +380,10 @@ export default class extends Component<any, any> {
                 }
               </div>
 
-              <div style={styles.footerItem}>
+              {/* <div
+                style={Object.assign({}, styles.footerItem, {
+                  marginLeft: 20
+                })}>
                 <a
                   href="./?src=https://editor.lottiefiles.com/whale.json"
                   style={styles.link}
@@ -395,7 +398,7 @@ export default class extends Component<any, any> {
                     onMouseOver={this.setLinkHoverActive}
                   />
                 </a>
-              </div>
+              </div> */}
 
               <div
                 style={Object.assign({}, styles.footerItem, {
