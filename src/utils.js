@@ -16,8 +16,9 @@ export const fade = (color: string, opacity: number = 0.4) => {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
+// main algorithm, it executes a callback on every color it finds
 export const getColors = (tree: Object, cb: Function, asset: number = -1) => {
-  if (tree) {
+  if (tree)
     tree.forEach((layer, i) => {
       if (layer.shapes)
         layer.shapes.forEach((shape, j) => {
@@ -50,7 +51,6 @@ export const getColors = (tree: Object, cb: Function, asset: number = -1) => {
             });
         });
     });
-  }
 };
 
 export const hexToRgb = (hex: string) => {
