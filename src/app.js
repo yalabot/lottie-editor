@@ -29,13 +29,13 @@ import {
 
 const palette = {
   black: '#171717',
-  gray: '#9e9e9e',
+  gray: '#7a7a7a',
   grayLight: '#d8d8d8',
-  grayLighter: '#f7f7f7',
-  green: '#58d370',
-  red: '#cc4533',
-  white: '#ffffff',
-  yellow: '#ffdb43'
+  grayLighter: '#f8f8f8',
+  primary: '#00d2c1',
+  secondary: '#00b7d2',
+  tertiary: '#007a88',
+  white: '#ffffff'
 };
 
 export default class extends Component<any, any> {
@@ -311,7 +311,7 @@ export default class extends Component<any, any> {
                     <Full style={styles.landing}>
                       <Bodymovin
                         dimensions={{ width: 128, height: 128 }}
-                        fallback={<Icons.Upload color={palette.green} />}
+                        fallback={<Icons.Upload color={palette.primary} />}
                         src={require('./animations/upload-w712-h712.json')}
                       />
                       <h3 style={styles.subtitle}>Drag and drop your JSON</h3>
@@ -327,8 +327,8 @@ export default class extends Component<any, any> {
           json && (
             <Paper style={styles.bottom}>
               <Button
-                backgroundColor={palette.green}
-                hoverColor={fade(palette.green)}
+                backgroundColor={palette.primary}
+                hoverColor={fade(palette.primary)}
                 icon={<Icons.Download color={palette.white} />}
                 onClick={this.export}
               />
@@ -345,7 +345,7 @@ export default class extends Component<any, any> {
           )}
 
         <Corner
-          backgroundColor={palette.green}
+          backgroundColor={palette.primary}
           color={palette.white}
           link="https://github.com/sonaye/bodymovin-editor"
         />
@@ -376,10 +376,10 @@ const styles = {
   cover: { bottom: 0, left: 0, position: 'fixed', right: 0, top: 0 },
   dropzone: { cursor: 'pointer', display: 'flex', flex: 1 },
   footer: { color: palette.gray, margin: 0, marginTop: 20 },
-  header: { color: palette.green, margin: 0, marginBottom: 17 },
+  header: { color: palette.primary, margin: 0, marginBottom: 17 },
   landing: { alignItems: 'center', justifyContent: 'center' },
   left: { marginRight: 20, maxWidth: 220 },
-  link: { color: palette.green, textDecoration: 'none' },
+  link: { color: palette.primary, textDecoration: 'none' },
   popover: { position: 'absolute', zIndex: 1 },
   right: { flex: 3, overflow: 'hidden' },
   row: { flexDirection: 'row' },
