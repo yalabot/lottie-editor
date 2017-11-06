@@ -65,6 +65,12 @@ export default class extends Component<any, any> {
     if (url) this.fetchUrl(url, fileName);
   }
 
+  setLinkHoverActive = () => this.setState({ linkHoverColor: palette.primary });
+  setLinkHoverInactive = () => this.setState({ linkHoverColor: palette.gray });
+
+  setBugHoverActive = () => this.setState({ bugHoverColor: palette.primary });
+  setBugHoverInactive = () => this.setState({ bugHoverColor: palette.gray });
+
   cols = [
     {
       prop: 'color',
@@ -233,11 +239,7 @@ export default class extends Component<any, any> {
   snack = (snackMessage: string) =>
     this.setState({ snack: true, snackMessage });
 
-  setLinkHoverActive = () => this.setState({ linkHoverColor: palette.primary });
-  setLinkHoverInactive = () => this.setState({ linkHoverColor: palette.gray });
-
-  setBugHoverActive = () => this.setState({ bugHoverColor: palette.primary });
-  setBugHoverInactive = () => this.setState({ bugHoverColor: palette.gray });
+  n = () => null;
 
   addAnimation: any;
 
@@ -380,15 +382,17 @@ export default class extends Component<any, any> {
 
               <div style={styles.footerItem}>
                 <a
-                  href="https://editor.lottiefiles.com/?src=https://editor.lottiefiles.com/whale.json"
+                  href="./?src=https://editor.lottiefiles.com/whale.json"
                   style={styles.link}
                   rel="noopener noreferrer"
                   target="_blank"
                   title="Append with /?src=YOUR_LINK">
                   <Icons.Link
                     color={linkHoverColor}
-                    onMouseOver={this.setLinkHoverActive}
+                    onBlur={this.n}
+                    onFocus={this.n}
                     onMouseOut={this.setLinkHoverInactive}
+                    onMouseOver={this.setLinkHoverActive}
                   />
                 </a>
               </div>
@@ -401,11 +405,14 @@ export default class extends Component<any, any> {
                   href="https://github.com/sonaye/bodymovin-editor/issues/1"
                   rel="noopener noreferrer"
                   style={styles.link}
-                  target="_blank">
+                  target="_blank"
+                  title="Not working? report here">
                   <Icons.Bug
                     color={bugHoverColor}
-                    onMouseOver={this.setBugHoverActive}
+                    onBlur={this.n}
+                    onFocus={this.n}
                     onMouseOut={this.setBugHoverInactive}
+                    onMouseOver={this.setBugHoverActive}
                   />
                 </a>
               </div>
