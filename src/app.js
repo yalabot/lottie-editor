@@ -447,7 +447,7 @@ const styles = {
     width: '100%',
     display: 'flex'
   },
-  container: { padding: 20 },
+  container: { padding: 20, backgroundColor: palette.grayLighter },
   cover: { bottom: 0, left: 0, position: 'fixed', right: 0, top: 0 },
   dropzone: { cursor: 'pointer', display: 'flex', flex: 1 },
   footer: { marginTop: 20 },
