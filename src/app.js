@@ -21,6 +21,7 @@ import {
   Bodymovin,
   Button,
   Corner,
+  ErrorView,
   Full,
   Icons,
   Paper,
@@ -38,10 +39,15 @@ const palette = {
   white: '#ffffff'
 };
 
+const { version } = require('../package.json');
+
 export default class extends Component<any, any> {
   state = {
+    bugHoverColor: palette.gray,
+    err: false,
     json: '',
     jsonName: '',
+    linkHoverColor: palette.gray,
     loading: false,
     picker: false,
     presetColors: Object.values(palette),
@@ -51,6 +57,13 @@ export default class extends Component<any, any> {
     snack: false,
     snackMessage: ''
   };
+
+  componentWillMount() {
+    const url = (window.location.href.split('src=')[1] || '').split('&')[0];
+    const fileName = url.split('/').pop();
+
+    if (url) this.fetchUrl(url, fileName);
+  }
 
   cols = [
     {
@@ -77,7 +90,24 @@ export default class extends Component<any, any> {
 
   original = '';
 
+  fetchUrl = (url: string, fileName: string) =>
+    this.setState({ json: '', err: '', loading: true }, () =>
+      fetch(url)
+        .then(res => res.json())
+        .then(json => this.parse(JSON.stringify(json), fileName))
+        .catch(err =>
+          this.setState({
+            err: true,
+            snack: true,
+            snackMessage: err.message,
+            loading: false
+          })
+        )
+    );
+
   hidePicker = () => this.setState({ picker: false });
+
+  assignAddAnimation = (ref: any) => (this.addAnimation = ref);
 
   pickColor = (color: Object) => {
     const { rows, selectedRow, selectedCol } = this.state;
@@ -127,7 +157,7 @@ export default class extends Component<any, any> {
       animation.setSpeed(3);
       animation.play();
       animation.addEventListener('complete', () =>
-        setTimeout(() => animation.goToAndStop(0), 750)
+        setTimeout(() => animation.goToAndStop(0), 500)
       );
     }
   };
@@ -138,42 +168,39 @@ export default class extends Component<any, any> {
 
       const reader = new FileReader();
 
-      reader.onload = e => {
-        const source = e.target.result;
-
-        this.original = source;
-
-        this.setState({ json: source, picker: false, rows: [] }, () => {
-          const rows = [];
-
-          const json = JSON.parse(this.state.json);
-
-          let jsonName = files[0].name.slice(0, -5);
-          jsonName += `-w${json.w}-h${json.h}.json`;
-
-          if (json && json.layers)
-            getColors(json.layers, color => rows.push(color));
-
-          if (json && json.assets)
-            json.assets.forEach((asset, i) =>
-              getColors(asset.layers, color => rows.push(color), i)
-            );
-
-          setTimeout(
-            () => this.setState({ rows, jsonName, loading: false }),
-            750
-          );
-        });
-      };
+      reader.onload = e => this.parse(e.target.result, files[0].name);
 
       reader.readAsText(files[0]);
     }
   };
 
+  parse = (source: string, fileName: string) => {
+    this.original = source;
+
+    this.setState({ json: source, picker: false, rows: [] }, () => {
+      const rows = [];
+
+      const json = JSON.parse(this.state.json);
+
+      let jsonName = fileName.slice(0, -5);
+      jsonName += `-w${json.w}-h${json.h}.json`;
+
+      if (json && json.layers)
+        getColors(json.layers, color => rows.push(color));
+
+      if (json && json.assets)
+        json.assets.forEach((asset, i) =>
+          getColors(asset.layers, color => rows.push(color), i)
+        );
+
+      setTimeout(() => this.setState({ rows, jsonName, loading: false }), 500);
+    });
+  };
+
   export = () => {
     download(this.state.json, this.state.jsonName);
 
-    setTimeout(() => this.snack('Diff is available in the console.'), 750);
+    setTimeout(() => this.snack('Diff is available in the console.'), 500);
 
     log('Computing diff ..');
 
@@ -206,11 +233,20 @@ export default class extends Component<any, any> {
   snack = (snackMessage: string) =>
     this.setState({ snack: true, snackMessage });
 
+  setLinkHoverActive = () => this.setState({ linkHoverColor: palette.primary });
+  setLinkHoverInactive = () => this.setState({ linkHoverColor: palette.gray });
+
+  setBugHoverActive = () => this.setState({ bugHoverColor: palette.primary });
+  setBugHoverInactive = () => this.setState({ bugHoverColor: palette.gray });
+
   addAnimation: any;
 
   render() {
     const {
+      bugHoverColor,
+      err,
       json,
+      linkHoverColor,
       loading,
       picker,
       presetColors,
@@ -221,11 +257,7 @@ export default class extends Component<any, any> {
     const Animation = () =>
       json && (
         <Bodymovin
-          fallback={
-            <Full style={styles.landing}>
-              <Icons.Sad color={palette.gray} />
-            </Full>
-          }
+          fallback={<ErrorView color={palette.gray} />}
           src={JSON.parse(json)}
         />
       );
@@ -238,7 +270,7 @@ export default class extends Component<any, any> {
           <a style={styles.link} href="./">
             Bodymovin Editor
           </a>
-          <sub style={styles.subtitle}> 0.0.2</sub>
+          <sub style={styles.subtitle}> {version}</sub>
         </h3>
 
         <Full style={styles.row}>
@@ -274,7 +306,7 @@ export default class extends Component<any, any> {
                           <Bodymovin
                             config={{ autoplay: false, loop: false }}
                             fallback={<Icons.Colorize color={invert(color)} />}
-                            ref={ref => (this.addAnimation = ref)}
+                            ref={this.assignAddAnimation}
                             src={require('./animations/added-w216-h216.json')}
                           />
                         }
@@ -305,7 +337,9 @@ export default class extends Component<any, any> {
 
               {!loading && (
                 <Full>
-                  {json ? (
+                  {err ? (
+                    <ErrorView color={palette.gray} />
+                  ) : json ? (
                     <Animation />
                   ) : (
                     <Full style={styles.landing}>
@@ -337,11 +371,45 @@ export default class extends Component<any, any> {
 
         {!loading &&
           !json && (
-            <p style={styles.footer}>
-              {
-                "Files uploaded here won't be visible for public and aren't stored anywhere in the cloud."
-              }
-            </p>
+            <div style={Object.assign({}, styles.footer, styles.row)}>
+              <div style={Object.assign({}, styles.footerItem, { flex: 3 })}>
+                {
+                  "Files uploaded here won't be visible for public and aren't stored anywhere in the cloud."
+                }
+              </div>
+
+              <div style={styles.footerItem}>
+                <a
+                  href="https://editor.lottiefiles.com/?src=https://editor.lottiefiles.com/whale.json"
+                  style={styles.link}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  title="Append with /?src=YOUR_LINK">
+                  <Icons.Link
+                    color={linkHoverColor}
+                    onMouseOver={this.setLinkHoverActive}
+                    onMouseOut={this.setLinkHoverInactive}
+                  />
+                </a>
+              </div>
+
+              <div
+                style={Object.assign({}, styles.footerItem, {
+                  marginLeft: 20
+                })}>
+                <a
+                  href="https://github.com/sonaye/bodymovin-editor/issues/1"
+                  rel="noopener noreferrer"
+                  style={styles.link}
+                  target="_blank">
+                  <Icons.Bug
+                    color={bugHoverColor}
+                    onMouseOver={this.setBugHoverActive}
+                    onMouseOut={this.setBugHoverInactive}
+                  />
+                </a>
+              </div>
+            </div>
           )}
 
         <Corner
@@ -375,14 +443,15 @@ const styles = {
   container: { padding: 20 },
   cover: { bottom: 0, left: 0, position: 'fixed', right: 0, top: 0 },
   dropzone: { cursor: 'pointer', display: 'flex', flex: 1 },
-  footer: { color: palette.gray, margin: 0, marginTop: 20 },
+  footer: { marginTop: 20 },
+  footerItem: { color: palette.gray, display: 'flex' },
   header: { color: palette.primary, margin: 0, marginBottom: 17 },
   landing: { alignItems: 'center', justifyContent: 'center' },
   left: { marginRight: 20, maxWidth: 220 },
   link: { color: palette.primary, textDecoration: 'none' },
   popover: { position: 'absolute', zIndex: 1 },
   right: { flex: 3, overflow: 'hidden' },
-  row: { flexDirection: 'row' },
+  row: { display: 'flex', flexDirection: 'row' },
   snack: { borderRadius: 0 },
   subtitle: { color: palette.gray }
 };

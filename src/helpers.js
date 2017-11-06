@@ -8,8 +8,10 @@ import DataTable from 'react-dt';
 import MUIButton from 'material-ui/FlatButton';
 import { Paper as MUIPaper } from 'material-ui';
 
+import Bug from 'material-ui/svg-icons/action/bug-report';
 import Colorize from 'material-ui/svg-icons/image/colorize';
 import Download from 'material-ui/svg-icons/file/file-download';
+import Link from 'material-ui/svg-icons/content/link';
 import Sad from 'material-ui/svg-icons/social/sentiment-very-dissatisfied';
 import Upload from 'material-ui/svg-icons/file/file-upload';
 
@@ -17,7 +19,7 @@ export const Button = (props: Object) => (
   <MUIButton {...props} style={Object.assign({}, styles.button, props.style)} />
 );
 
-export const Icons = { Colorize, Download, Sad, Upload };
+export const Icons = { Bug, Colorize, Download, Link, Sad, Upload };
 
 export class Bodymovin extends Component<any, any> {
   state = { err: false };
@@ -97,6 +99,12 @@ const tableProps = {
     style: { display: 'none' }
   }
 };
+
+export const ErrorView = (props: Object) => (
+  <Full style={styles.landing}>
+    <Icons.Sad color={props.color} />
+  </Full>
+);
 
 export const Corner = (props: Object) => (
   <a
