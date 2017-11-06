@@ -221,8 +221,11 @@ export default class extends Component<any, any> {
     const Animation = () =>
       json && (
         <Bodymovin
-          fallback={<Icons.Sad color={palette.gray} />}
-          landing
+          fallback={
+            <Full style={styles.landing}>
+              <Icons.Sad color={palette.gray} />
+            </Full>
+          }
           src={JSON.parse(json)}
         />
       );
