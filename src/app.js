@@ -3,6 +3,9 @@
 import React, { Component } from 'react';
 
 import Dropzone from 'react-dropzone';
+import log from 'log-with-style';
+import Snack from 'material-ui/Snackbar';
+import { diffTrimmedLines as diff } from 'diff';
 import { SketchPicker as Picker } from 'react-color';
 
 import {
@@ -14,23 +17,39 @@ import {
   toUnitVector
 } from './utils';
 
-import { Button, Bodymovin, Full, Icons, Paper, Table } from './helpers';
+import {
+  Bodymovin,
+  Button,
+  Corner,
+  Full,
+  Icons,
+  Paper,
+  Table
+} from './helpers';
 
 const palette = {
+  black: '#171717',
   gray: '#9e9e9e',
+  grayLight: '#d8d8d8',
+  grayLighter: '#f7f7f7',
   green: '#58d370',
-  white: '#ffffff'
+  red: '#cc4533',
+  white: '#ffffff',
+  yellow: '#ffdb43'
 };
 
 export default class extends Component<any, any> {
   state = {
     json: '',
     jsonName: '',
+    loading: false,
     picker: false,
-    presetColors: [],
+    presetColors: Object.values(palette),
     rows: [],
     selectedCol: -1,
-    selectedRow: -1
+    selectedRow: -1,
+    snack: false,
+    snackMessage: ''
   };
 
   cols = [
@@ -38,14 +57,20 @@ export default class extends Component<any, any> {
       prop: 'color',
       render: (color: string, row: number, col: number) => (
         <div // eslint-disable-line
-          style={Object.assign({}, { backgroundColor: color }, styles.colorRow)}
+          style={Object.assign(
+            {},
+            { backgroundColor: color, color: invert(color) },
+            styles.colorRow,
+            styles.landing
+          )}
           onClick={() =>
             this.setState({
               picker: !this.state.picker,
               selectedCol: col,
               selectedRow: row
-            })}
-        />
+            })}>
+          {color}
+        </div>
       )
     }
   ];
@@ -96,10 +121,21 @@ export default class extends Component<any, any> {
     const { color } = rows[selectedRow];
 
     this.setState({ presetColors: presetColors.concat(color) });
+
+    if (this.addAnimation && this.addAnimation.ref) {
+      const animation = this.addAnimation.ref;
+      animation.setSpeed(3);
+      animation.play();
+      animation.addEventListener('complete', () =>
+        setTimeout(() => animation.goToAndStop(0), 750)
+      );
+    }
   };
 
   upload = (files: any) => {
     if (files[0]) {
+      this.setState({ loading: true });
+
       const reader = new FileReader();
 
       reader.onload = e => {
@@ -123,7 +159,10 @@ export default class extends Component<any, any> {
               getColors(asset.layers, color => rows.push(color), i)
             );
 
-          this.setState({ rows, jsonName });
+          setTimeout(
+            () => this.setState({ rows, jsonName, loading: false }),
+            750
+          );
         });
       };
 
@@ -134,51 +173,56 @@ export default class extends Component<any, any> {
   export = () => {
     download(this.state.json, this.state.jsonName);
 
-    // if (process.env.NODE_ENV === 'development')
-    import('diff').then(diff =>
-      import('log-with-style').then(logWithStyle => {
-        // console.clear();
+    setTimeout(() => this.snack('Diff is available in the console.'), 750);
 
-        let additions = 0;
-        let deletions = 0;
+    log('Computing diff ..');
 
-        const original = JSON.stringify(JSON.parse(this.original), null, 2);
-        const parsed = JSON.stringify(JSON.parse(this.state.json), null, 2);
+    let additions = 0;
+    let deletions = 0;
 
-        diff
-          .diffTrimmedLines(original, parsed, { newlineIsToken: true })
-          .forEach(part => {
-            const { added, removed, value } = part;
+    const original = JSON.stringify(JSON.parse(this.original), null, 2);
+    const parsed = JSON.stringify(JSON.parse(this.state.json), null, 2);
 
-            const color = added ? 'green' : removed ? 'red' : null;
+    diff(original, parsed, {
+      newlineIsToken: true
+    }).forEach(part => {
+      const { added, removed, value } = part;
 
-            if (color)
-              logWithStyle(
-                `[c="color: ${color};"]${added ? '+' : '-'} ${value}[c]`
-              );
+      const color = added ? 'green' : removed ? 'red' : null;
 
-            if (added) additions += value.length;
-            else if (removed) deletions += value.length;
-          });
+      if (color) log(`[c="color: ${color};"]${added ? '+' : '-'} ${value}[c]`);
 
-        logWithStyle(
-          `[c="color: green;"]${additions} additions[c], [c="color: red;"]${deletions} deletions[c].`
-        );
-      })
+      if (added) additions += value.length;
+      else if (removed) deletions += value.length;
+    });
+
+    log(
+      `[c="color: green;"]${additions} additions[c], [c="color: red;"]${deletions} deletions[c].`
     );
   };
 
+  closeSnack = () => this.setState({ snack: false });
+
+  snack = (snackMessage: string) =>
+    this.setState({ snack: true, snackMessage });
+
+  addAnimation: any;
+
   render() {
-    const { presetColors, json, picker, rows, selectedRow } = this.state;
+    const {
+      json,
+      loading,
+      picker,
+      presetColors,
+      rows,
+      selectedRow
+    } = this.state;
 
     const Animation = () =>
       json && (
         <Bodymovin
-          fallback={
-            <Full style={styles.landing}>
-              <Icons.Sad color={palette.gray} />
-            </Full>
-          }
+          fallback={<Icons.Sad color={palette.gray} />}
+          landing
           src={JSON.parse(json)}
         />
       );
@@ -187,37 +231,59 @@ export default class extends Component<any, any> {
 
     return (
       <Full style={styles.container}>
+        <h3 style={styles.header}>
+          <a style={styles.link} href="./">
+            Bodymovin Editor
+          </a>
+          <sub style={styles.subtitle}> 0.0.2</sub>
+        </h3>
+
         <Full style={styles.row}>
-          {json && (
-            <Paper style={styles.left}>
-              {picker && (
-                <div style={styles.popover}>
-                  <div // eslint-disable-line
-                    onClick={this.hidePicker}
-                    style={styles.cover}
-                  />
-
-                  <Picker
-                    color={color}
-                    disableAlpha
-                    onChange={this.pickColor}
-                    presetColors={presetColors}
-                  />
-
-                  <div style={styles.pushButton}>
-                    <Button
-                      backgroundColor={color}
-                      fullWidth
-                      hoverColor={fade(color)}
-                      icon={<Icons.Colorize color={invert(color)} />}
-                      onClick={this.pushColor}
+          {!loading &&
+            json && (
+              <Paper style={styles.left}>
+                {picker && (
+                  <div style={styles.popover}>
+                    <div // eslint-disable-line
+                      onClick={this.hidePicker}
+                      style={styles.cover}
                     />
+
+                    <Picker
+                      color={color}
+                      disableAlpha
+                      onChange={this.pickColor}
+                      presetColors={presetColors}
+                    />
+
+                    <div
+                      style={{
+                        backgroundColor:
+                          color === palette.white
+                            ? palette.black
+                            : palette.white
+                      }}>
+                      <Button
+                        backgroundColor={color}
+                        fullWidth
+                        hoverColor={fade(color)}
+                        icon={
+                          <Bodymovin
+                            config={{ autoplay: false, loop: false }}
+                            fallback={<Icons.Colorize color={invert(color)} />}
+                            ref={ref => (this.addAnimation = ref)}
+                            src={require('./animations/added-w216-h216.json')}
+                          />
+                        }
+                        onClick={this.pushColor}
+                        style={styles.add}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
-              <Table cols={this.cols} rows={rows} />
-            </Paper>
-          )}
+                )}
+                <Table cols={this.cols} rows={rows} />
+              </Paper>
+            )}
 
           <Paper style={styles.right}>
             <Dropzone
@@ -225,49 +291,95 @@ export default class extends Component<any, any> {
               multiple={false}
               onDrop={this.upload}
               style={styles.dropzone}>
-              <Full>
-                {json ? (
-                  <Animation />
-                ) : (
-                  <Full style={styles.landing}>
-                    <Icons.Upload color={palette.green} />
-                  </Full>
-                )}
-              </Full>
+              {loading && (
+                <Bodymovin
+                  dimensions={{ width: 128, height: 128 }}
+                  fallback={<p style={styles.subtitle}>Loading ..</p>}
+                  landing
+                  src={require('./animations/loading-w256-h256.json')}
+                />
+              )}
+
+              {!loading && (
+                <Full>
+                  {json ? (
+                    <Animation />
+                  ) : (
+                    <Full style={styles.landing}>
+                      <Bodymovin
+                        dimensions={{ width: 128, height: 128 }}
+                        fallback={<Icons.Upload color={palette.green} />}
+                        src={require('./animations/upload-w712-h712.json')}
+                      />
+                      <h3 style={styles.subtitle}>Drag and drop your JSON</h3>
+                    </Full>
+                  )}
+                </Full>
+              )}
             </Dropzone>
           </Paper>
         </Full>
 
-        {json && (
-          <Paper style={styles.bottom}>
-            <Button
-              backgroundColor={palette.green}
-              hoverColor={fade(palette.green)}
-              icon={<Icons.Download color={palette.white} />}
-              onClick={this.export}
-            />
-          </Paper>
-        )}
+        {!loading &&
+          json && (
+            <Paper style={styles.bottom}>
+              <Button
+                backgroundColor={palette.green}
+                hoverColor={fade(palette.green)}
+                icon={<Icons.Download color={palette.white} />}
+                onClick={this.export}
+              />
+            </Paper>
+          )}
+
+        {!loading &&
+          !json && (
+            <p style={styles.footer}>
+              {
+                "Files uploaded here won't be visible for public and aren't stored anywhere in the cloud."
+              }
+            </p>
+          )}
+
+        <Corner
+          backgroundColor={palette.green}
+          color={palette.white}
+          link="https://github.com/sonaye/bodymovin-editor"
+        />
+
+        <Snack
+          autoHideDuration={4000}
+          bodyStyle={styles.snack}
+          message={this.state.snackMessage}
+          onRequestClose={this.closeSnack}
+          open={this.state.snack}
+        />
       </Full>
     );
   }
 }
 
 const styles = {
+  add: { paddingBottom: 10, paddingTop: 10 },
   bottom: { marginTop: 20, maxHeight: 48 },
   colorRow: {
     cursor: 'pointer',
-    display: 'inline-block',
+    fontSize: 16,
     height: 48,
-    width: '100%'
+    width: '100%',
+    display: 'flex'
   },
   container: { padding: 20 },
   cover: { bottom: 0, left: 0, position: 'fixed', right: 0, top: 0 },
   dropzone: { cursor: 'pointer', display: 'flex', flex: 1 },
+  footer: { color: palette.gray, margin: 0, marginTop: 20 },
+  header: { color: palette.green, margin: 0, marginBottom: 17 },
   landing: { alignItems: 'center', justifyContent: 'center' },
   left: { marginRight: 20, maxWidth: 220 },
+  link: { color: palette.green, textDecoration: 'none' },
   popover: { position: 'absolute', zIndex: 1 },
-  pushButton: { backgroundColor: palette.white },
   right: { flex: 3, overflow: 'hidden' },
-  row: { flexDirection: 'row' }
+  row: { flexDirection: 'row' },
+  snack: { borderRadius: 0 },
+  subtitle: { color: palette.gray }
 };
