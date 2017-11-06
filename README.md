@@ -6,4 +6,4 @@ Contributions are welcome, help improve this tool. Work in progress, not ready f
 
 Test it [here](https://editor.lottiefiles.com).
 
-<img src="https://raw.githubusercontent.com/sonaye/bodymovin-editor/master/demo.gif" width="800">
+<img src="https://raw.githubusercontent.com/sonaye/bodymovin-editor/master/demo.gif" width="400">
