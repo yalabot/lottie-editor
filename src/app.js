@@ -86,7 +86,8 @@ export default class extends Component<any, any> {
               picker: !this.state.picker,
               selectedCol: col,
               selectedRow: row
-            })}>
+            })
+          }>
           {color}
         </div>
       )
@@ -229,7 +230,9 @@ export default class extends Component<any, any> {
     });
 
     log(
-      `[c="color: green;"]${additions} additions[c], [c="color: red;"]${deletions} deletions[c].`
+      `[c="color: green;"]${additions} additions[c], [c="color: red;"]${
+        deletions
+      } deletions[c].`
     );
   };
 
