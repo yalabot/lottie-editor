@@ -60,9 +60,8 @@ export default class extends Component<any, any> {
 
   componentWillMount() {
     const url = (window.location.href.split('src=')[1] || '').split('&')[0];
-    const fileName = url.split('/').pop();
 
-    if (url) this.fetchUrl(url, fileName);
+    if (url) this.fetchUrl(url, 'animation.json');
   }
 
   setLinkHoverActive = () => this.setState({ linkHoverColor: palette.primary });

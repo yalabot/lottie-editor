@@ -24,7 +24,7 @@ export const getColors = (tree: Object, cb: Function, asset: number = -1) => {
         layer.shapes.forEach((shape, j) => {
           if (shape.it)
             shape.it.forEach((prop, k) => {
-              if (prop.ty === 'fl' || prop.ty === 'st') {
+              if (['fl', 'st'].includes(prop.ty)) {
                 const color = prop.c.k;
 
                 // eslint-disable-next-line
