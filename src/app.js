@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import Dropzone from 'react-dropzone';
 import log from 'log-with-style';
 import Snack from 'material-ui/Snackbar';
+import Tooltip from 'react-tooltip';
 import { diffTrimmedLines as diff } from 'diff';
 import { SketchPicker as Picker } from 'react-color';
 
@@ -87,7 +88,8 @@ export default class extends Component<any, any> {
               selectedCol: col,
               selectedRow: row
             })
-          }>
+          }
+          data-tip={this.state.rows[row].nm}>
           {color}
         </div>
       )
@@ -321,6 +323,7 @@ export default class extends Component<any, any> {
                   </div>
                 )}
                 <Table cols={this.cols} rows={rows} />
+                <Tooltip effect="solid" place="right" />
               </Paper>
             )}
 

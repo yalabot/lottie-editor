@@ -42,6 +42,7 @@ export const getColors = (tree: Object, cb: Function, asset: number = -1) => {
                   g,
                   b,
                   a,
+                  nm: prop.nm,
                   asset,
                   color: rgbToHex(r, g, b)
                 };
