@@ -5,7 +5,6 @@ import React, { Component } from 'react';
 import Dropzone from 'react-dropzone';
 import log from 'log-with-style';
 import Snack from 'material-ui/Snackbar';
-import Tooltip from 'react-tooltip';
 import { diffTrimmedLines as diff } from 'diff';
 import { SketchPicker as Picker } from 'react-color';
 
@@ -19,7 +18,7 @@ import {
 } from './utils';
 
 import {
-  Bodymovin,
+  Lottie,
   Button,
   Corner,
   ErrorView,
@@ -56,7 +55,8 @@ export default class extends Component<any, any> {
     selectedCol: -1,
     selectedRow: -1,
     snack: false,
-    snackMessage: ''
+    snackMessage: '',
+    showLayerNames: false
   };
 
   componentWillMount() {
@@ -88,9 +88,10 @@ export default class extends Component<any, any> {
               selectedCol: col,
               selectedRow: row
             })
-          }
-          data-tip={this.state.rows[row].nm}>
+          }>
           {color}
+          {this.state.showLayerNames && <br />}
+          {this.state.showLayerNames && this.state.rows[row].nm}
         </div>
       )
     }
@@ -232,9 +233,7 @@ export default class extends Component<any, any> {
     });
 
     log(
-      `[c="color: green;"]${additions} additions[c], [c="color: red;"]${
-        deletions
-      } deletions[c].`
+      `[c="color: green;"]${additions} additions[c], [c="color: red;"]${deletions} deletions[c].`
     );
   };
 
@@ -244,6 +243,9 @@ export default class extends Component<any, any> {
     this.setState({ snack: true, snackMessage });
 
   n = () => null;
+
+  toggleNames = () =>
+    this.setState({ showLayerNames: !this.state.showLayerNames });
 
   addAnimation: any;
 
@@ -262,7 +264,7 @@ export default class extends Component<any, any> {
 
     const Animation = () =>
       json && (
-        <Bodymovin
+        <Lottie
           fallback={<ErrorView color={palette.gray} />}
           src={JSON.parse(json)}
         />
@@ -274,7 +276,7 @@ export default class extends Component<any, any> {
       <Full style={styles.container}>
         <h3 style={styles.header}>
           <a style={styles.link} href="./">
-            Bodymovin Editor
+            Lottie Editor
           </a>
           <sub style={styles.subtitle}> {version}</sub>
         </h3>
@@ -309,7 +311,7 @@ export default class extends Component<any, any> {
                         fullWidth
                         hoverColor={fade(color)}
                         icon={
-                          <Bodymovin
+                          <Lottie
                             config={{ autoplay: false, loop: false }}
                             fallback={<Icons.Colorize color={invert(color)} />}
                             ref={this.assignAddAnimation}
@@ -323,7 +325,6 @@ export default class extends Component<any, any> {
                   </div>
                 )}
                 <Table cols={this.cols} rows={rows} />
-                <Tooltip effect="solid" place="right" />
               </Paper>
             )}
 
@@ -334,7 +335,7 @@ export default class extends Component<any, any> {
               onDrop={this.upload}
               style={styles.dropzone}>
               {loading && (
-                <Bodymovin
+                <Lottie
                   dimensions={{ width: 128, height: 128 }}
                   fallback={<p style={styles.subtitle}>Loading ..</p>}
                   landing
@@ -350,7 +351,7 @@ export default class extends Component<any, any> {
                     <Animation />
                   ) : (
                     <Full style={styles.landing}>
-                      <Bodymovin
+                      <Lottie
                         dimensions={{ width: 128, height: 128 }}
                         fallback={<Icons.Upload color={palette.primary} />}
                         src={require('./animations/upload-w712-h712.json')}
@@ -366,14 +367,26 @@ export default class extends Component<any, any> {
 
         {!loading &&
           json && (
-            <Paper style={styles.bottom}>
-              <Button
-                backgroundColor={palette.primary}
-                hoverColor={fade(palette.primary)}
-                icon={<Icons.Download color={palette.white} />}
-                onClick={this.export}
-              />
-            </Paper>
+            <div style={styles.bottom}>
+              <Paper style={styles.layersBtn}>
+                <Button
+                  backgroundColor={palette.primary}
+                  hoverColor={fade(palette.primary)}
+                  icon={<Icons.Layers color={palette.white} />}
+                  onClick={this.toggleNames}
+                  style={{ maxWidth: 220 }}
+                />
+              </Paper>
+
+              <Paper>
+                <Button
+                  backgroundColor={palette.primary}
+                  hoverColor={fade(palette.primary)}
+                  icon={<Icons.Download color={palette.white} />}
+                  onClick={this.export}
+                />
+              </Paper>
+            </div>
           )}
 
         {!loading &&
@@ -410,7 +423,7 @@ export default class extends Component<any, any> {
                   marginLeft: 20
                 })}>
                 <a
-                  href="https://github.com/sonaye/bodymovin-editor/issues/1"
+                  href="https://github.com/sonaye/lottie-editor/issues/1"
                   rel="noopener noreferrer"
                   style={styles.link}
                   target="_blank"
@@ -430,7 +443,7 @@ export default class extends Component<any, any> {
         <Corner
           backgroundColor={palette.primary}
           color={palette.white}
-          link="https://github.com/sonaye/bodymovin-editor"
+          link="https://github.com/sonaye/lottie-editor"
         />
 
         <Snack
@@ -447,10 +460,16 @@ export default class extends Component<any, any> {
 
 const styles = {
   add: { paddingBottom: 10, paddingTop: 10 },
-  bottom: { marginTop: 20, maxHeight: 48 },
+  bottom: {
+    marginTop: 20,
+    maxHeight: 48,
+    flexDirection: 'row',
+    display: 'flex'
+  },
   colorRow: {
     cursor: 'pointer',
     fontSize: 16,
+    textAlign: 'center',
     height: 48,
     width: '100%',
     display: 'flex'
@@ -468,5 +487,6 @@ const styles = {
   right: { flex: 3, overflow: 'hidden' },
   row: { display: 'flex', flexDirection: 'row' },
   snack: { borderRadius: 0 },
-  subtitle: { color: palette.gray }
+  subtitle: { color: palette.gray },
+  layersBtn: { maxWidth: 220, marginRight: 20 }
 };

@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 
-import bodymovin from 'bodymovin/build/player/bodymovin.min';
+import lottie from 'lottie-web/build/player/lottie.min';
 import DataTable from 'react-dt';
 
 import MUIButton from 'material-ui/FlatButton';
@@ -14,14 +14,15 @@ import Download from 'material-ui/svg-icons/file/file-download';
 import Link from 'material-ui/svg-icons/content/link';
 import Sad from 'material-ui/svg-icons/social/sentiment-very-dissatisfied';
 import Upload from 'material-ui/svg-icons/file/file-upload';
+import Layers from 'material-ui/svg-icons/maps/layers';
 
 export const Button = (props: Object) => (
   <MUIButton {...props} style={Object.assign({}, styles.button, props.style)} />
 );
 
-export const Icons = { Bug, Colorize, Download, Link, Sad, Upload };
+export const Icons = { Bug, Colorize, Download, Link, Sad, Upload, Layers };
 
-export class Bodymovin extends Component<any, any> {
+export class Lottie extends Component<any, any> {
   state = { err: false };
 
   componentWillUnmount() {
@@ -30,7 +31,7 @@ export class Bodymovin extends Component<any, any> {
 
   play = (wrapper: any) => {
     try {
-      this.ref = bodymovin.loadAnimation({
+      this.ref = lottie.loadAnimation({
         autoplay: true,
         loop: true,
         ...this.props.config,
