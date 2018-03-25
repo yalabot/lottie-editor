@@ -1,6 +1,6 @@
 {
   "version": "0.0.4",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "diff": "3.4.0",
