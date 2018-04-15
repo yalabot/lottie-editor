@@ -1,23 +1,18 @@
-// @flow
+import { saveAs } from 'file-saver';
 
-export const download = (json: string, jsonName: string) => {
+export const download = (json, jsonName) => {
   const uri = `data:text/json;charset=utf-8,${json}`;
 
-  const link = document.createElement('a');
-
-  link.setAttribute('href', encodeURI(uri));
-  link.setAttribute('download', jsonName);
-
-  link.click();
+  uri.toBlob(blob => saveAs(blob, jsonName));
 };
 
-export const fade = (color: string, opacity: number = 0.4) => {
+export const fade = (color, opacity = 0.4) => {
   const { r, g, b } = hexToRgb(color);
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
 // main algorithm, it executes a callback on every color it finds
-export const getColors = (tree: Object, cb: Function, asset: number = -1) => {
+export const getColors = (tree, cb, asset = -1) => {
   if (tree)
     tree.forEach((layer, i) => {
       if (layer.shapes)
@@ -54,7 +49,7 @@ export const getColors = (tree: Object, cb: Function, asset: number = -1) => {
     });
 };
 
-export const hexToRgb = (hex: string) => {
+export const hexToRgb = hex => {
   const rgb = hexToComponents(hex);
 
   return rgb
@@ -70,7 +65,7 @@ export const hexToRgb = (hex: string) => {
       };
 };
 
-export const invert = (hex: string) => {
+export const invert = hex => {
   const rgb = hexToComponents(hex);
 
   const { r, g, b } = rgb
@@ -88,17 +83,17 @@ export const invert = (hex: string) => {
   return rgbToHex(r, g, b);
 };
 
-export const toUnitVector = (n: number) => Math.round(n / 255 * 1000) / 1000;
+export const toUnitVector = n => Math.round(n / 255 * 1000) / 1000;
 
-const fromUnitVector = (n: number) => Math.round(n * 255);
+const fromUnitVector = n => Math.round(n * 255);
 
-const rgbToHex = (r: number, g: number, b: number) =>
+const rgbToHex = (r, g, b) =>
   `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
 
-const hexToComponents = (hex: string) =>
+const hexToComponents = hex =>
   /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
-const componentToHex = (c: number) => {
+const componentToHex = c => {
   const hex = c.toString(16);
   return hex.length === 1 ? `0${hex}` : hex;
 };

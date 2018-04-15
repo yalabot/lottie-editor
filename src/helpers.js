@@ -1,5 +1,3 @@
-// @flow
-
 import React, { Component } from 'react';
 
 import lottie from 'lottie-web/build/player/lottie.min';
@@ -16,20 +14,20 @@ import Sad from 'material-ui/svg-icons/social/sentiment-very-dissatisfied';
 import Upload from 'material-ui/svg-icons/file/file-upload';
 import Layers from 'material-ui/svg-icons/maps/layers';
 
-export const Button = (props: Object) => (
+export const Button = props => (
   <MUIButton {...props} style={Object.assign({}, styles.button, props.style)} />
 );
 
 export const Icons = { Bug, Colorize, Download, Link, Sad, Upload, Layers };
 
-export class Lottie extends Component<any, any> {
+export class Lottie extends Component {
   state = { err: false };
 
   componentWillUnmount() {
     if (this.animation) this.ref.destroy();
   }
 
-  play = (wrapper: any) => {
+  play = wrapper => {
     try {
       this.ref = lottie.loadAnimation({
         autoplay: true,
@@ -43,8 +41,6 @@ export class Lottie extends Component<any, any> {
       this.setState({ err: true });
     }
   };
-
-  ref: any;
 
   render() {
     if (this.state.err) {
@@ -74,11 +70,11 @@ export class Lottie extends Component<any, any> {
   }
 }
 
-export const Full = (props: Object) => (
+export const Full = props => (
   <div {...props} style={Object.assign({}, styles.full, props.style)} />
 );
 
-export const Paper = (props: Object) => (
+export const Paper = props => (
   <MUIPaper
     zDepth={1}
     {...props}
@@ -86,9 +82,7 @@ export const Paper = (props: Object) => (
   />
 );
 
-export const Table = (props: Object) => (
-  <DataTable {...tableProps} {...props} />
-);
+export const Table = props => <DataTable {...tableProps} {...props} />;
 
 const tableProps = {
   tableProps: { fixedHeader: false, selectable: false },
@@ -101,13 +95,13 @@ const tableProps = {
   }
 };
 
-export const ErrorView = (props: Object) => (
+export const ErrorView = props => (
   <Full style={styles.landing}>
     <Icons.Sad color={props.color} />
   </Full>
 );
 
-export const Corner = (props: Object) => (
+export const Corner = props => (
   <a
     aria-label="View on Github"
     className="github-corner"

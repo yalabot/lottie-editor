@@ -1,5 +1,3 @@
-// @flow
-
 import React, { Component } from 'react';
 
 import Dropzone from 'react-dropzone';
@@ -41,7 +39,7 @@ const palette = {
 
 const { version } = require('../package.json');
 
-export default class extends Component<any, any> {
+export default class extends Component {
   state = {
     bugHoverColor: palette.gray,
     err: false,
@@ -74,7 +72,7 @@ export default class extends Component<any, any> {
   cols = [
     {
       prop: 'color',
-      render: (color: string, row: number, col: number) => (
+      render: (color, row, col) => (
         <div // eslint-disable-line
           style={Object.assign(
             {},
@@ -99,7 +97,7 @@ export default class extends Component<any, any> {
 
   original = '';
 
-  fetchUrl = (url: string, fileName: string) =>
+  fetchUrl = (url, fileName) =>
     this.setState({ json: '', err: '', loading: true }, () =>
       fetch(url)
         .then(res => res.json())
@@ -116,7 +114,7 @@ export default class extends Component<any, any> {
 
   hidePicker = () => this.setState({ picker: false });
 
-  assignAddAnimation = (ref: any) => (this.addAnimation = ref);
+  assignAddAnimation = ref => (this.addAnimation = ref);
 
   pickColor = (color: Object) => {
     const { rows, selectedRow, selectedCol } = this.state;
@@ -171,7 +169,7 @@ export default class extends Component<any, any> {
     }
   };
 
-  upload = (files: any) => {
+  upload = files => {
     if (files[0]) {
       this.setState({ loading: true });
 
@@ -183,7 +181,7 @@ export default class extends Component<any, any> {
     }
   };
 
-  parse = (source: string, fileName: string) => {
+  parse = (source, fileName) => {
     this.original = source;
 
     this.setState({ json: source, picker: false, rows: [] }, () => {
@@ -239,15 +237,12 @@ export default class extends Component<any, any> {
 
   closeSnack = () => this.setState({ snack: false });
 
-  snack = (snackMessage: string) =>
-    this.setState({ snack: true, snackMessage });
+  snack = snackMessage => this.setState({ snack: true, snackMessage });
 
   n = () => null;
 
   toggleNames = () =>
     this.setState({ showLayerNames: !this.state.showLayerNames });
-
-  addAnimation: any;
 
   render() {
     const {

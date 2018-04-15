@@ -1,5 +1,3 @@
-// @flow
-
 import React from 'react';
 import { render } from 'react-dom';
 
@@ -23,7 +21,6 @@ const Index = () => (
   </ThemeProvider>
 );
 
-// flow-disable-next-line
 render(<Index />, document.getElementById('root'));
 
 registerServiceWorker();
