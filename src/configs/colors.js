@@ -1,6 +1,4 @@
-import { createMuiTheme } from 'material-ui/styles';
-
-const colors = {
+export default {
   black: '#171717',
   gray: '#7a7a7a',
   grayLight: '#d8d8d8',
@@ -10,19 +8,3 @@ const colors = {
   tertiary: '#007a88',
   white: '#ffffff'
 };
-
-const theme = createMuiTheme({
-  // palette: {
-  //   common: { black: colors.black },
-  //   text: { primary: colors.black },
-  //   primary: {
-  //     light: colors.primary,
-  //     contrastText: colors.white
-  //   }
-  // },
-  typography: {
-    fontFamily: 'Open Sans'
-  }
-});
-
-export { colors as default, theme };
