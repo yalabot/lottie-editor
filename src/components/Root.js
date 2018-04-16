@@ -341,8 +341,7 @@ export default class extends Component {
             <div style={styles.bottom}>
               <Paper style={styles.layersBtn}>
                 <Btn
-                  backgroundColor={colors.primary}
-                  hoverColor={fade(colors.primary)}
+                  variant="raised"
                   icon={<Icon name="Layers" color={colors.white} />}
                   onClick={this.toggleNames}
                   style={{ maxWidth: 220 }}
@@ -351,8 +350,7 @@ export default class extends Component {
 
               <Paper>
                 <Btn
-                  backgroundColor={colors.primary}
-                  hoverColor={fade(colors.primary)}
+                  variant="raised"
                   icon={<Icon name="FileDownload" color={colors.white} />}
                   onClick={this.export}
                 />
@@ -441,12 +439,12 @@ const styles = {
   footerItem: { color: colors.gray, display: 'flex' },
   header: { color: colors.primary, margin: 0, marginBottom: 17 },
   landing: { alignItems: 'center', justifyContent: 'center' },
-  left: { marginRight: 20, maxWidth: 220 },
+  left: { marginRight: 20, width: 220 },
   link: { color: colors.primary, textDecoration: 'none' },
   popover: { position: 'absolute', zIndex: 1 },
   right: { flex: 3, overflow: 'hidden' },
   row: { display: 'flex', flexDirection: 'row' },
   snack: { borderRadius: 0 },
   subtitle: { color: colors.gray },
-  layersBtn: { maxWidth: 220, marginRight: 20 }
+  layersBtn: { width: 220, marginRight: 20 }
 };

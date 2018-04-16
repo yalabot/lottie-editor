@@ -1,7 +1,10 @@
 import { saveAs } from 'file-saver';
 
-export const download = (json, jsonName) =>
-  `data:text/json;charset=utf-8,${json}`.toBlob(blob => saveAs(blob, jsonName));
+export const download = (json, jsonName) => {
+  const blob = new Blob([json], { type: 'text/json;charset=utf-8' });
+
+  saveAs(blob, jsonName);
+};
 
 // color manipulation utils
 
