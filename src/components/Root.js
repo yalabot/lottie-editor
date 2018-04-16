@@ -300,7 +300,7 @@ export default class extends Component {
                   </div>
                 )}
 
-                <Table cols={this.cols} rows={rows} />
+                <Table noHead cols={this.cols} rows={rows} />
               </Paper>
             )}
 
@@ -341,19 +341,18 @@ export default class extends Component {
             <div style={styles.bottom}>
               <Paper style={styles.layersBtn}>
                 <Btn
+                  color="primary"
                   variant="raised"
-                  icon={<Icon name="Layers" color={colors.white} />}
                   onClick={this.toggleNames}
-                  style={{ maxWidth: 220 }}
-                />
+                  style={{ width: 220 }}>
+                  <Icon name="Layers" color={colors.white} />
+                </Btn>
               </Paper>
 
               <Paper>
-                <Btn
-                  variant="raised"
-                  icon={<Icon name="FileDownload" color={colors.white} />}
-                  onClick={this.export}
-                />
+                <Btn color="primary" variant="raised" onClick={this.export}>
+                  <Icon name="FileDownload" color={colors.white} />
+                </Btn>
               </Paper>
             </div>
           )}
