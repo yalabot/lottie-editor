@@ -431,19 +431,24 @@ const styles = {
     width: '100%',
     display: 'flex'
   },
-  container: { padding: 20, backgroundColor: colors.grayLighter },
+  container: {
+    padding: 20,
+    paddingRight: 40,
+    paddingLeft: 40,
+    backgroundColor: colors.grayLighter
+  },
   cover: { bottom: 0, left: 0, position: 'fixed', right: 0, top: 0 },
   dropzone: { cursor: 'pointer', display: 'flex', flex: 1 },
   footer: { marginTop: 20 },
   footerItem: { color: colors.gray, display: 'flex' },
   header: { color: colors.primary, margin: 0, marginBottom: 17 },
   landing: { alignItems: 'center', justifyContent: 'center' },
-  left: { marginRight: 20, width: 220 },
+  left: { marginRight: 40, width: 220 },
   link: { color: colors.primary, textDecoration: 'none' },
   popover: { position: 'absolute', zIndex: 1 },
   right: { flex: 3, overflow: 'hidden' },
   row: { display: 'flex', flexDirection: 'row' },
   snack: { borderRadius: 0 },
   subtitle: { color: colors.gray },
-  layersBtn: { width: 220, marginRight: 20 }
+  layersBtn: { width: 220, marginRight: 40 }
 };
