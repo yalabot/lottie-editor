@@ -1,26 +1,25 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import ThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import CssBaseline from 'material-ui/CssBaseline';
+import { MuiThemeProvider } from 'material-ui/styles';
 
-import App from './app';
-import { Full } from './helpers';
+import { theme } from './configs/colors';
 
-import registerServiceWorker from './registerServiceWorker';
+import Root from './app';
 
-import './style.css';
+import './assets/styles/app.css';
 
-const muiTheme = getMuiTheme({ fontFamily: 'Delius' });
+// import registerServiceWorker from './registerServiceWorker';
 
-const Index = () => (
-  <ThemeProvider muiTheme={muiTheme}>
-    <Full>
-      <App />
-    </Full>
-  </ThemeProvider>
+const App = () => (
+  <MuiThemeProvider theme={theme}>
+    <CssBaseline />
+
+    <Root />
+  </MuiThemeProvider>
 );
 
-render(<Index />, document.getElementById('root'));
+render(<App />, document.getElementById('root'));
 
-registerServiceWorker();
+// registerServiceWorker();
