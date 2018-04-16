@@ -3,52 +3,40 @@ import React, { Component } from 'react';
 import Dropzone from 'react-dropzone';
 import log from 'log-with-style';
 import Snack from 'material-ui/Snackbar';
+import { CircularProgress } from 'material-ui/Progress';
 import { diffTrimmedLines as diff } from 'diff';
 import { SketchPicker as Picker } from 'react-color';
+
+import colors from '../configs/colors';
+import getColors from '../configs/algorithm';
 
 import {
   download,
   fade,
-  getColors,
   hexToRgb,
   invert,
   toUnitVector
-} from './utils';
+} from '../configs/utils';
 
-import {
-  Lottie,
-  Button,
-  Corner,
-  ErrorView,
-  Full,
-  Icons,
-  Paper,
-  Table
-} from './helpers';
+import Btn from './Btn';
+import ErrorView from './ErrorView';
+import Full from './Full';
+import GithubCorner from './GithubCorner';
+import Icon from './Icon';
+import Lottie from './Lottie';
+import Paper from './Paper';
+import Table from './Table';
 
-const palette = {
-  black: '#171717',
-  gray: '#7a7a7a',
-  grayLight: '#d8d8d8',
-  grayLighter: '#f8f8f8',
-  primary: '#00d2c1',
-  secondary: '#00b7d2',
-  tertiary: '#007a88',
-  white: '#ffffff'
-};
-
-const { version } = require('../package.json');
+const { version } = require('../../package.json');
 
 export default class extends Component {
   state = {
-    bugHoverColor: palette.gray,
     err: false,
     json: '',
     jsonName: '',
-    linkHoverColor: palette.gray,
     loading: false,
     picker: false,
-    presetColors: Object.values(palette),
+    presetColors: Object.values(colors),
     rows: [],
     selectedCol: -1,
     selectedRow: -1,
@@ -62,12 +50,6 @@ export default class extends Component {
 
     if (url) this.fetchUrl(url, 'animation.json');
   }
-
-  setLinkHoverActive = () => this.setState({ linkHoverColor: palette.primary });
-  setLinkHoverInactive = () => this.setState({ linkHoverColor: palette.gray });
-
-  setBugHoverActive = () => this.setState({ bugHoverColor: palette.primary });
-  setBugHoverInactive = () => this.setState({ bugHoverColor: palette.gray });
 
   cols = [
     {
@@ -105,9 +87,9 @@ export default class extends Component {
         .catch(err =>
           this.setState({
             err: true,
+            loading: false,
             snack: true,
-            snackMessage: err.message,
-            loading: false
+            snackMessage: err.message
           })
         )
     );
@@ -235,11 +217,9 @@ export default class extends Component {
     );
   };
 
+  showSnack = snackMessage => this.setState({ snack: true, snackMessage });
+
   closeSnack = () => this.setState({ snack: false });
-
-  snack = snackMessage => this.setState({ snack: true, snackMessage });
-
-  n = () => null;
 
   toggleNames = () =>
     this.setState({ showLayerNames: !this.state.showLayerNames });
@@ -260,7 +240,7 @@ export default class extends Component {
     const Animation = () =>
       json && (
         <Lottie
-          fallback={<ErrorView color={palette.gray} />}
+          fallback={<ErrorView color={colors.gray} />}
           src={JSON.parse(json)}
         />
       );
@@ -297,20 +277,20 @@ export default class extends Component {
                     <div
                       style={{
                         backgroundColor:
-                          color === palette.white
-                            ? palette.black
-                            : palette.white
+                          color === colors.white ? colors.black : colors.white
                       }}>
-                      <Button
+                      <Btn
                         backgroundColor={color}
                         fullWidth
                         hoverColor={fade(color)}
                         icon={
                           <Lottie
                             config={{ autoplay: false, loop: false }}
-                            fallback={<Icons.Colorize color={invert(color)} />}
+                            fallback={
+                              <Icon name="Colorize" color={invert(color)} />
+                            }
                             ref={this.assignAddAnimation}
-                            src={require('./animations/added-w216-h216.json')}
+                            src={require('../assets/animations/added.json')}
                           />
                         }
                         onClick={this.pushColor}
@@ -319,6 +299,7 @@ export default class extends Component {
                     </div>
                   </div>
                 )}
+
                 <Table cols={this.cols} rows={rows} />
               </Paper>
             )}
@@ -330,26 +311,21 @@ export default class extends Component {
               onDrop={this.upload}
               style={styles.dropzone}>
               {loading && (
-                <Lottie
-                  dimensions={{ width: 128, height: 128 }}
-                  fallback={<p style={styles.subtitle}>Loading ..</p>}
-                  landing
-                  src={require('./animations/loading-w256-h256.json')}
-                />
+                <CircularProgress style={{ color: colors.primary }} />
               )}
 
               {!loading && (
                 <Full>
                   {err ? (
-                    <ErrorView color={palette.gray} />
+                    <ErrorView color={colors.gray} />
                   ) : json ? (
                     <Animation />
                   ) : (
                     <Full style={styles.landing}>
-                      <Lottie
-                        dimensions={{ width: 128, height: 128 }}
-                        fallback={<Icons.Upload color={palette.primary} />}
-                        src={require('./animations/upload-w712-h712.json')}
+                      <Icon
+                        name="FileUpload"
+                        color={colors.primary}
+                        size={128}
                       />
                       <h3 style={styles.subtitle}>Drag and drop your JSON</h3>
                     </Full>
@@ -364,20 +340,20 @@ export default class extends Component {
           json && (
             <div style={styles.bottom}>
               <Paper style={styles.layersBtn}>
-                <Button
-                  backgroundColor={palette.primary}
-                  hoverColor={fade(palette.primary)}
-                  icon={<Icons.Layers color={palette.white} />}
+                <Btn
+                  backgroundColor={colors.primary}
+                  hoverColor={fade(colors.primary)}
+                  icon={<Icon name="Layers" color={colors.white} />}
                   onClick={this.toggleNames}
                   style={{ maxWidth: 220 }}
                 />
               </Paper>
 
               <Paper>
-                <Button
-                  backgroundColor={palette.primary}
-                  hoverColor={fade(palette.primary)}
-                  icon={<Icons.Download color={palette.white} />}
+                <Btn
+                  backgroundColor={colors.primary}
+                  hoverColor={fade(colors.primary)}
+                  icon={<Icon name="FileDownload" color={colors.white} />}
                   onClick={this.export}
                 />
               </Paper>
@@ -398,18 +374,13 @@ export default class extends Component {
                   marginLeft: 20
                 })}>
                 <a
-                  href="./?src=https://editor.lottiefiles.com/whale.json"
+                  // href="./?src=https://editor.lottiefiles.com/whale.json"
+                  href="./?src=http://localhost:3000/whale.json"
                   style={styles.link}
                   rel="noopener noreferrer"
                   target="_blank"
                   title="Append with /?src=YOUR_LINK">
-                  <Icons.Link
-                    color={linkHoverColor}
-                    onBlur={this.n}
-                    onFocus={this.n}
-                    onMouseOut={this.setLinkHoverInactive}
-                    onMouseOver={this.setLinkHoverActive}
-                  />
+                  <Icon color={linkHoverColor} name="Link" />
                 </a>
               </div>
 
@@ -423,21 +394,15 @@ export default class extends Component {
                   style={styles.link}
                   target="_blank"
                   title="Not working? report here">
-                  <Icons.Bug
-                    color={bugHoverColor}
-                    onBlur={this.n}
-                    onFocus={this.n}
-                    onMouseOut={this.setBugHoverInactive}
-                    onMouseOver={this.setBugHoverActive}
-                  />
+                  <Icon name="BugReport" color={bugHoverColor} />
                 </a>
               </div>
             </div>
           )}
 
-        <Corner
-          backgroundColor={palette.primary}
-          color={palette.white}
+        <GithubCorner
+          backgroundColor={colors.primary}
+          color={colors.white}
           link="https://github.com/sonaye/lottie-editor"
         />
 
@@ -469,19 +434,19 @@ const styles = {
     width: '100%',
     display: 'flex'
   },
-  container: { padding: 20, backgroundColor: palette.grayLighter },
+  container: { padding: 20, backgroundColor: colors.grayLighter },
   cover: { bottom: 0, left: 0, position: 'fixed', right: 0, top: 0 },
   dropzone: { cursor: 'pointer', display: 'flex', flex: 1 },
   footer: { marginTop: 20 },
-  footerItem: { color: palette.gray, display: 'flex' },
-  header: { color: palette.primary, margin: 0, marginBottom: 17 },
+  footerItem: { color: colors.gray, display: 'flex' },
+  header: { color: colors.primary, margin: 0, marginBottom: 17 },
   landing: { alignItems: 'center', justifyContent: 'center' },
   left: { marginRight: 20, maxWidth: 220 },
-  link: { color: palette.primary, textDecoration: 'none' },
+  link: { color: colors.primary, textDecoration: 'none' },
   popover: { position: 'absolute', zIndex: 1 },
   right: { flex: 3, overflow: 'hidden' },
   row: { display: 'flex', flexDirection: 'row' },
   snack: { borderRadius: 0 },
-  subtitle: { color: palette.gray },
+  subtitle: { color: colors.gray },
   layersBtn: { maxWidth: 220, marginRight: 20 }
 };

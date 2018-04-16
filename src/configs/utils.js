@@ -1,52 +1,14 @@
 import { saveAs } from 'file-saver';
 
-export const download = (json, jsonName) => {
-  const uri = `data:text/json;charset=utf-8,${json}`;
+export const download = (json, jsonName) =>
+  `data:text/json;charset=utf-8,${json}`.toBlob(blob => saveAs(blob, jsonName));
 
-  uri.toBlob(blob => saveAs(blob, jsonName));
-};
+// color manipulation utils
 
 export const fade = (color, opacity = 0.4) => {
   const { r, g, b } = hexToRgb(color);
+
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-};
-
-// main algorithm, it executes a callback on every color it finds
-export const getColors = (tree, cb, asset = -1) => {
-  if (tree)
-    tree.forEach((layer, i) => {
-      if (layer.shapes)
-        layer.shapes.forEach((shape, j) => {
-          if (shape.it)
-            shape.it.forEach((prop, k) => {
-              if (['fl', 'st'].includes(prop.ty)) {
-                const color = prop.c.k;
-
-                // eslint-disable-next-line
-                let [r, g, b, a] = color;
-
-                r = fromUnitVector(r);
-                g = fromUnitVector(g);
-                b = fromUnitVector(b);
-
-                const meta = {
-                  i,
-                  j,
-                  k,
-                  r,
-                  g,
-                  b,
-                  a,
-                  nm: prop.nm,
-                  asset,
-                  color: rgbToHex(r, g, b)
-                };
-
-                if (cb) cb(meta);
-              }
-            });
-        });
-    });
 };
 
 export const hexToRgb = hex => {
@@ -85,9 +47,9 @@ export const invert = hex => {
 
 export const toUnitVector = n => Math.round(n / 255 * 1000) / 1000;
 
-const fromUnitVector = n => Math.round(n * 255);
+export const fromUnitVector = n => Math.round(n * 255);
 
-const rgbToHex = (r, g, b) =>
+export const rgbToHex = (r, g, b) =>
   `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
 
 const hexToComponents = hex =>

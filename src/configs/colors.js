@@ -12,16 +12,16 @@ const colors = {
 };
 
 const theme = createMuiTheme({
-  palette: {
-    common: { black: colors.black },
-    text: { primary: colors.black },
-    primary: {
-      light: colors.primary,
-      contrastText: colors.white
-    }
-  },
+  // palette: {
+  //   common: { black: colors.black },
+  //   text: { primary: colors.black },
+  //   primary: {
+  //     light: colors.primary,
+  //     contrastText: colors.white
+  //   }
+  // },
   typography: {
-    fontFamily: 'Delius'
+    fontFamily: 'Open Sans'
   }
 });
 
