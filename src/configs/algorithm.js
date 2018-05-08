@@ -1,4 +1,6 @@
-import { fromUnitVector, rgbToHex } from './utils';
+import { rgbToHex } from 'color-invert';
+
+import { fromUnitVector } from './utils';
 
 // main algorithm, it executes a callback on every color it finds
 const getColors = (tree, cb, asset = -1) => {

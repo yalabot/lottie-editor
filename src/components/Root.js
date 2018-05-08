@@ -1,22 +1,17 @@
 import React, { Component } from 'react';
 
+import { CircularProgress } from 'material-ui/Progress';
+import { diffTrimmedLines as diff } from 'diff';
+import { fade, hexToRgb, invert } from 'color-invert';
+import { SketchPicker as Picker } from 'react-color';
 import Dropzone from 'react-dropzone';
 import log from 'log-with-style';
 import Snack from 'material-ui/Snackbar';
-import { CircularProgress } from 'material-ui/Progress';
-import { diffTrimmedLines as diff } from 'diff';
-import { SketchPicker as Picker } from 'react-color';
 
 import colors from '../configs/colors';
 import getColors from '../configs/algorithm';
 
-import {
-  download,
-  fade,
-  hexToRgb,
-  invert,
-  toUnitVector
-} from '../configs/utils';
+import { download, toUnitVector } from '../configs/utils';
 
 import Btn from './Btn';
 import ErrorView from './ErrorView';
