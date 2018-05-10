@@ -1,11 +1,30 @@
 import React, { Component } from 'react';
 
 import lottie from 'lottie-web/build/player/lottie.min';
+import PropTypes from 'prop-types';
 
 import Full from './Full';
 import Landing from './Landing';
 
 export default class Lottie extends Component {
+  static propTypes = {
+    config: PropTypes.object,
+    src: PropTypes.string.isRequired,
+    fallback: PropTypes.any,
+    landing: PropTypes.bool,
+    dimensions: PropTypes.shape({
+      height: PropTypes.number.isRequired,
+      width: PropTypes.number.isRequired
+    })
+  };
+
+  static defaultProps = {
+    config: {},
+    fallback: undefined,
+    landing: false,
+    dimensions: undefined
+  };
+
   state = { err: false };
 
   componentWillUnmount() {

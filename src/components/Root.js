@@ -5,6 +5,7 @@ import { diffTrimmedLines as diff } from 'diff';
 import { fade, hexToRgb, invert } from 'color-invert';
 import { SketchPicker as Picker } from 'react-color';
 import Dropzone from 'react-dropzone';
+import GithubCorner from 'react-github-corner';
 import log from 'log-with-style';
 import Snack from 'material-ui/Snackbar';
 
@@ -16,7 +17,6 @@ import { download, toUnitVector } from '../configs/utils';
 import Btn from './Btn';
 import ErrorView from './ErrorView';
 import Full from './Full';
-import GithubCorner from './GithubCorner';
 import Icon from './Icon';
 import Lottie from './Lottie';
 import Paper from './Paper';
@@ -393,9 +393,9 @@ export default class extends Component {
           )}
 
         <GithubCorner
-          backgroundColor={colors.primary}
-          color={colors.white}
-          link="https://github.com/sonaye/lottie-editor"
+          bannerColor={colors.primary}
+          href="https://github.com/sonaye/lottie-editor"
+          octoColor={colors.white}
         />
 
         <Snack

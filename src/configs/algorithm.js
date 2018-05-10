@@ -3,7 +3,7 @@ import { rgbToHex } from 'color-invert';
 import { fromUnitVector } from './utils';
 
 // main algorithm, it executes a callback on every color it finds
-const getColors = (tree, cb, asset = -1) => {
+const getColors = (tree: Object, cb: Function, asset: number = -1): void => {
   if (tree)
     tree.forEach((layer, i) => {
       if (layer.shapes)

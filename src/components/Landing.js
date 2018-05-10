@@ -1,8 +1,6 @@
-import styled from 'styled-components';
-
 import Full from './Full';
 
-const Landing = styled(Full)`
+const Landing = Full.extend`
   align-items: center;
   justify-content: center;
 `;

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import PropTypes from 'prop-types';
+
 import BugReport from '@material-ui/icons/BugReport';
 import Colorize from '@material-ui/icons/Colorize';
 import FileDownload from '@material-ui/icons/FileDownload';
@@ -21,6 +23,12 @@ const icons = {
 const Icon = props => {
   const I = icons[props.name];
   return <I style={{ color: props.color, width: props.size }} />;
+};
+
+Icon.propTypes = {
+  color: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  size: PropTypes.number
 };
 
 Icon.defaultProps = {

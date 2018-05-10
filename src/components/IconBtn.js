@@ -1,5 +1,7 @@
 import React from 'react';
 
+import PropTypes from 'prop-types';
+
 import Button from 'material-ui/Button';
 import styled from 'styled-components';
 
@@ -21,5 +23,9 @@ const IconBtn = styled(Button).attrs({
     opacity: 1;
   }
 `;
+
+IconBtn.propTypes = {
+  name: PropTypes.string.isRequired
+};
 
 export default IconBtn;
