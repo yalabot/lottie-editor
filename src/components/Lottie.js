@@ -9,7 +9,7 @@ import Landing from './Landing';
 export default class Lottie extends Component {
   static propTypes = {
     config: PropTypes.object,
-    src: PropTypes.string.isRequired,
+    src: PropTypes.object.isRequired,
     fallback: PropTypes.any,
     landing: PropTypes.bool,
     dimensions: PropTypes.shape({
@@ -32,12 +32,14 @@ export default class Lottie extends Component {
   }
 
   play = wrapper => {
+    const { config, src } = this.props;
+
     try {
       this.ref = lottie.loadAnimation({
         autoplay: true,
         loop: true,
-        ...this.props.config,
-        animationData: this.props.src,
+        ...config,
+        animationData: src,
         renderer: 'svg',
         wrapper
       });

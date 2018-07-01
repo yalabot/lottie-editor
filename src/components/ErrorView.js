@@ -5,9 +5,9 @@ import PropTypes from 'prop-types';
 import Icon from './Icon';
 import Landing from './Landing';
 
-const ErrorView = props => (
+const ErrorView = ({ color }) => (
   <Landing>
-    <Icon name="SentimentVeryDissatisfied" color={props.color} />
+    <Icon name="SentimentVeryDissatisfied" color={color} />
   </Landing>
 );
 

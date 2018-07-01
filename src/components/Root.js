@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 
-import { CircularProgress } from 'material-ui/Progress';
 import { diffTrimmedLines as diff } from 'diff';
 import { fade, hexToRgb, invert } from 'color-invert';
 import { SketchPicker as Picker } from 'react-color';
+
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Dropzone from 'react-dropzone';
 import GithubCorner from 'react-github-corner';
 import log from 'log-with-style';
-import Snack from 'material-ui/Snackbar';
+import Snack from '@material-ui/core/Snackbar';
 
 import colors from '../configs/colors';
 import getColors from '../configs/algorithm';
@@ -46,29 +47,34 @@ export default class extends Component {
     if (url) this.fetchUrl(url, 'animation.json');
   }
 
+  // eslint-disable-next-line react/sort-comp
   cols = [
     {
       prop: 'color',
-      render: (color, row, col) => (
-        <div // eslint-disable-line
-          style={Object.assign(
-            {},
-            { backgroundColor: color, color: invert(color) },
-            styles.colorRow,
-            styles.landing
-          )}
-          onClick={() =>
-            this.setState({
-              picker: !this.state.picker,
-              selectedCol: col,
-              selectedRow: row
-            })
-          }>
-          {color}
-          {this.state.showLayerNames && <br />}
-          {this.state.showLayerNames && this.state.rows[row].nm}
-        </div>
-      )
+      render: (color, row, col) => {
+        const { picker, showLayerNames, rows } = this.state;
+
+        return (
+          <div // eslint-disable-line
+            style={Object.assign(
+              {},
+              { backgroundColor: color, color: invert(color) },
+              styles.colorRow,
+              styles.landing
+            )}
+            onClick={() =>
+              this.setState({
+                picker: !picker,
+                selectedCol: col,
+                selectedRow: row
+              })
+            }>
+            {color}
+            {showLayerNames && <br />}
+            {showLayerNames && rows[row].nm}
+          </div>
+        );
+      }
     }
   ];
 
@@ -94,7 +100,7 @@ export default class extends Component {
   assignAddAnimation = ref => (this.addAnimation = ref);
 
   pickColor = (color: Object) => {
-    const { rows, selectedRow, selectedCol } = this.state;
+    const { rows, selectedRow, selectedCol, json } = this.state;
 
     const { i, j, k, a, asset } = rows[selectedRow];
 
@@ -104,27 +110,29 @@ export default class extends Component {
     newRows[selectedRow][this.cols[selectedCol].prop] = newColor;
     this.setState({ rows: newRows });
 
-    const newJson = JSON.parse(this.state.json);
+    const newJson = JSON.parse(json);
 
     const { r, g, b } = hexToRgb(newColor);
 
     if (asset === -1) {
-      if (newJson && newJson.layers)
+      if (newJson && newJson.layers) {
         newJson.layers[i].shapes[j].it[k].c.k = [
           toUnitVector(r),
           toUnitVector(g),
           toUnitVector(b),
           a
         ];
+      }
     } else {
-      // eslint-disable-next-line
-      if (newJson && newJson.assets)
+      // eslint-disable-next-line no-lonely-if
+      if (newJson && newJson.assets) {
         newJson.assets[asset].layers[i].shapes[j].it[k].c.k = [
           toUnitVector(r),
           toUnitVector(g),
           toUnitVector(b),
           a
         ];
+      }
     }
 
     this.setState({ json: JSON.stringify(newJson) });
@@ -164,27 +172,32 @@ export default class extends Component {
     this.setState({ json: source, picker: false, rows: [] }, () => {
       const rows = [];
 
-      const json = JSON.parse(this.state.json);
+      let { json } = this.state;
+      json = JSON.parse(json);
 
       let jsonName = fileName.slice(0, -5);
       jsonName += `-w${json.w}-h${json.h}.json`;
 
-      if (json && json.layers)
+      if (json && json.layers) {
         getColors(json.layers, color => rows.push(color));
+      }
 
-      if (json && json.assets)
+      if (json && json.assets) {
         json.assets.forEach((asset, i) =>
           getColors(asset.layers, color => rows.push(color), i)
         );
+      }
 
       setTimeout(() => this.setState({ rows, jsonName, loading: false }), 500);
     });
   };
 
   export = () => {
-    download(this.state.json, this.state.jsonName);
+    const { json, jsonName } = this.state;
 
-    setTimeout(() => this.snack('Diff is available in the console.'), 500);
+    download(json, jsonName);
+
+    setTimeout(() => this.showSnack('Diff is available in the console.'), 500);
 
     log('Computing diff ..');
 
@@ -192,7 +205,7 @@ export default class extends Component {
     let deletions = 0;
 
     const original = JSON.stringify(JSON.parse(this.original), null, 2);
-    const parsed = JSON.stringify(JSON.parse(this.state.json), null, 2);
+    const parsed = JSON.stringify(JSON.parse(json), null, 2);
 
     diff(original, parsed, {
       newlineIsToken: true
@@ -217,7 +230,7 @@ export default class extends Component {
   closeSnack = () => this.setState({ snack: false });
 
   toggleNames = () =>
-    this.setState({ showLayerNames: !this.state.showLayerNames });
+    this.setState(state => ({ showLayerNames: !state.showLayerNames }));
 
   render() {
     const {
@@ -229,7 +242,9 @@ export default class extends Component {
       picker,
       presetColors,
       rows,
-      selectedRow
+      selectedRow,
+      snack,
+      snackMessage
     } = this.state;
 
     const Animation = () =>
@@ -400,10 +415,10 @@ export default class extends Component {
 
         <Snack
           autoHideDuration={4000}
-          bodyStyle={styles.snack}
-          message={this.state.snackMessage}
-          onRequestClose={this.closeSnack}
-          open={this.state.snack}
+          // bodyStyle={styles.snack}
+          message={snackMessage}
+          // onRequestClose={this.closeSnack}
+          open={snack}
         />
       </Full>
     );

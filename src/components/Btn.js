@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import Button from 'material-ui/Button';
+import Button from '@material-ui/core/Button';
 
 const Btn = styled(Button)`
   border-radius: 0 !important;

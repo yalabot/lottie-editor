@@ -20,9 +20,9 @@ const icons = {
   SentimentVeryDissatisfied
 };
 
-const Icon = props => {
-  const I = icons[props.name];
-  return <I style={{ color: props.color, width: props.size }} />;
+const Icon = ({ name, color, size }) => {
+  const I = icons[name];
+  return <I style={{ color, width: size }} />;
 };
 
 Icon.propTypes = {

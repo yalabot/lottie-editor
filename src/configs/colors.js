@@ -1,4 +1,4 @@
-import { createMuiTheme } from 'material-ui/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
 
 const colors = {
   black: '#171717',
