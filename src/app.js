@@ -152,7 +152,36 @@ export default class extends Component<any, any> {
         ];
     }
 
-    this.setState({ json: JSON.stringify(newJson) });
+    this.setState({ json: JSON.stringify(newJson) }, this.showDiff);
+  };
+
+  showDiff = () => {
+    setTimeout(() => this.snack('Diff is available in the console.'), 500);
+
+    log('Computing diff ..');
+
+    let additions = 0;
+    let deletions = 0;
+
+    const original = JSON.stringify(JSON.parse(this.original), null, 2);
+    const parsed = JSON.stringify(JSON.parse(this.state.json), null, 2);
+
+    diff(original, parsed, {
+      newlineIsToken: true
+    }).forEach(part => {
+      const { added, removed, value } = part;
+
+      const color = added ? 'green' : removed ? 'red' : null;
+
+      if (color) log(`[c="color: ${color};"]${added ? '+' : '-'} ${value}[c]`);
+
+      if (added) additions += value.length;
+      else if (removed) deletions += value.length;
+    });
+
+    log(
+      `[c="color: green;"]${additions} additions[c], [c="color: red;"]${deletions} deletions[c].`
+    );
   };
 
   pushColor = () => {
@@ -209,32 +238,7 @@ export default class extends Component<any, any> {
   export = () => {
     download(this.state.json, this.state.jsonName);
 
-    setTimeout(() => this.snack('Diff is available in the console.'), 500);
-
-    log('Computing diff ..');
-
-    let additions = 0;
-    let deletions = 0;
-
-    const original = JSON.stringify(JSON.parse(this.original), null, 2);
-    const parsed = JSON.stringify(JSON.parse(this.state.json), null, 2);
-
-    diff(original, parsed, {
-      newlineIsToken: true
-    }).forEach(part => {
-      const { added, removed, value } = part;
-
-      const color = added ? 'green' : removed ? 'red' : null;
-
-      if (color) log(`[c="color: ${color};"]${added ? '+' : '-'} ${value}[c]`);
-
-      if (added) additions += value.length;
-      else if (removed) deletions += value.length;
-    });
-
-    log(
-      `[c="color: green;"]${additions} additions[c], [c="color: red;"]${deletions} deletions[c].`
-    );
+    this.showDiff();
   };
 
   closeSnack = () => this.setState({ snack: false });

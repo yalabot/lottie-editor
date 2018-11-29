@@ -27,8 +27,7 @@
     "build": "react-scripts build",
     "deploy": "firebase deploy",
     "flow": "flow --show-all-errors; exit 0",
-    "format":
-      "prettier --write --single-quote --jsx-bracket-same-line 'src/**/*.js'",
+    "format": "prettier --write --single-quote --jsx-bracket-same-line 'src/**/*.js'",
     "lint": "eslint src; exit 0",
     "serve": "firebase serve",
     "start": "react-scripts start"
